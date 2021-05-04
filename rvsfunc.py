@@ -62,11 +62,44 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode, mask: Optional[vs.Video
     :param mask:        Optionally an external mask to use for copying over the
                         credits if the detail_mask doesn't do a good enough job.
     """
-    def _mask(clipa, clipb):
-        clipa = core.resize.Point(clipa, format=clipb.format.id) if not clipa.format.id == clipb.format.id else clipa
-        return core.std.Expr([clipa, clipb], 'x y - abs').std.Binarize()
     mask = _mask(source,nc) if not mask else mask
     return core.std.MaskedMerge(nc, source, mask)
+
+# Immediately make a credit mask
+def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
+                 absthresh: float=0.065, iters: int=4,
+                 descaler: Callable[[vs.VideoNode, Any], vs.videoNode]=None,
+                 upscaler: Callable[[vs.VideoNode, Any], vs.videoNode]=None,
+                 dekwargs: dict={}, upkwargs: dict={}):
+    """ Credit masking function borrowed from Scrad.
+
+    Changed it to be used in a more generic manner, but the core stuff and
+    math comes from him. Or wherever he got it.
+    Returns a 32 bit (GrayS) mask.
+
+    :param luma:        Luma plane of the input video. If it has more planes,
+                        the luma plane will be extracted.
+    :param b:           b value for the descaler, defaults to 1/3.
+    :param c:           c value for the descaler, defaults to 1/3.
+    :param absthresh:   The abs threshold to use for the Expression used to
+                        generate the actual mask.
+    :param iters:       How often to iterate calls to core.std.Maximum and
+                        core.std.Inflate for the mask.
+    :param descaler:    The descaling function to call, defaults to None and
+                        then gets set to core.descale.Debicubic.
+    :param upscaler:    The upscaling function, defaults to Bicubic.
+    :param dekwargs:    A dict with extra options for the descaler.
+    :param upkwargs:    A dict with extra options for the upscaler.
+    """
+    luma = vsutil.get_y(luma)
+    descaler = core.descale.Debicubic if not descaler else descaler
+    upscaler = core.resize.Bicubic if not upscaler else upscaler
+    _descaled = descaler(luma, vsutil.get_w(810), 810, b=0.2, c=0.4, **dekwargs)
+    _rescaled = upscaler(_descaled, 1920, 1080, **upkwargs)
+    _mask = core.std.Expr([vsutil.depth(luma, 32), _rescaled], f'x y - abs {absthresh} < 0 1 ?')
+    _mask = vsutil.iterate(_mask, core.std.Maximum, iters)
+    _mask = vsutil.iterate(_mask, core.std.Inflate, iters)
+    return _mask
 
 def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float=0.05) -> vs.VideoNode:
     """ Generates a fairly basic detail mask
