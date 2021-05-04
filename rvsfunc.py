@@ -64,7 +64,7 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode, mask: Optional[vs.Video
     """
     def _mask(clipa, clipb):
         clipa = core.resize.Point(clipa, format=clipb.format.id) if not clipa.format.id == clipb.format.id else clipa
-        return core.std.Expr([sy, ry], 'x y - abs').std.Binarize()
+        return core.std.Expr([clipa, clipb], 'x y - abs').std.Binarize()
     mask = _mask(source,nc) if not mask else mask
     return core.std.MaskedMerge(nc, source, mask)
 
