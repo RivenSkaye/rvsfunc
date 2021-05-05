@@ -67,10 +67,10 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode, mask: Optional[vs.Video
 
 # Immediately make a credit mask
 def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
-                 absthresh: float=0.065, iters: int=4,
-                 descaler: Callable[[vs.VideoNode, Any], vs.videoNode]=None,
-                 upscaler: Callable[[vs.VideoNode, Any], vs.videoNode]=None,
-                 dekwargs: dict={}, upkwargs: dict={}):
+                 height: int=720, absthresh: float=0.060, iters: int=4,
+                 descaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=None,
+                 upscaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=None,
+                 dekwargs: dict={}, upkwargs: dict={}) -> vs.VideoNode:
     """ Credit masking function borrowed from Scrad.
 
     Changed it to be used in a more generic manner, but the core stuff and
@@ -81,6 +81,9 @@ def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
                         the luma plane will be extracted.
     :param b:           b value for the descaler, defaults to 1/3.
     :param c:           c value for the descaler, defaults to 1/3.
+    :param height:      The height to descale to in order to get the error rate
+                        difference correct for the source. Width will be
+                        calculated using the ratios of the source.
     :param absthresh:   The abs threshold to use for the Expression used to
                         generate the actual mask.
     :param iters:       How often to iterate calls to core.std.Maximum and
@@ -92,14 +95,15 @@ def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
     :param upkwargs:    A dict with extra options for the upscaler.
     """
     luma = vsutil.get_y(luma)
+    luma = vsutil.depth(luma, 32)
     descaler = core.descale.Debicubic if not descaler else descaler
     upscaler = core.resize.Bicubic if not upscaler else upscaler
-    _descaled = descaler(luma, vsutil.get_w(810), 810, b=0.2, c=0.4, **dekwargs)
-    _rescaled = upscaler(_descaled, 1920, 1080, **upkwargs)
-    _mask = core.std.Expr([vsutil.depth(luma, 32), _rescaled], f'x y - abs {absthresh} < 0 1 ?')
-    _mask = vsutil.iterate(_mask, core.std.Maximum, iters)
-    _mask = vsutil.iterate(_mask, core.std.Inflate, iters)
-    return _mask
+    descaled = descaler(luma, vsutil.get_w(height, luma.width/luma.height), height, b=b, c=c, **dekwargs)
+    rescaled = upscaler(descaled, luma.width, luma.height, **upkwargs)
+    mask = core.std.Expr([luma, rescaled], f'x y - abs {absthresh} < 0 1 ?')
+    mask = vsutil.iterate(mask, core.std.Maximum, iters)
+    mask = vsutil.iterate(mask, core.std.Inflate, iters)
+    return mask
 
 def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float=0.05) -> vs.VideoNode:
     """ Generates a fairly basic detail mask
