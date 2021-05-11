@@ -8,38 +8,22 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe:
               use_internal: bool=False, ext_mask: Optional[vs.VideoNode]=None, **kwargs) -> vs.VideoNode:
     """ Function for splicing in video from a different source.
 
-    Originally written to splice in NCs whilst keeping the option open to keep
-    the episode credits, this function takes an optional callable to perform
-    any filtering on the NC. For example merging in the credits from the source
-    clip. Assumes that `nc` will be added into the source clip in full. If this
-    behavior is undesirable, either use a different function for it or send in
-    only the part of the second clip that needs to be spliced in.
+    The intended purpose is to splice NCs into an episode when they look better
+    or when they're easier to filter. Allows for copying over the credits.
 
     :param source:          The source clip that needs something replaced
     :param nc:              The clip that needs to be spliced into source
     :param startframe:      The frame to start splicing at. This is an inclusive
-                            selection value, and in reality 1 is added to it due to
-                            how slicing works in Python. The selected range is
-                            `source[:startframe+1]`.
+                            selection value. The selected range is `source[:startframe+1]`.
     :param endframe:        The first frame that needs to be kept. This is an
                             inclusive selection value, selected as `source[endframe:]`.
-    :param nc_filterfunc:   The function to call to perform filering on the NC.
-                            For convenience, all additional kwargs will be
-                            passed into this function as well. Use this for any
-                            arguments that the external function needs.
-    :param use_internal:    Whether or not to use internal functions to mask in
-                            the difference between source and nc. As this is
-                            originally meant to merge in credits, the internal
-                            function `copy_credits` which uses some borrowed
-                            logic in an attempt to merge in all credits from
-                            the target range in the source clip. Using the
-                            internal functions or nc_filterfunc are mutually
-                            exclusive. Kwargs will not be passed on to this.
-                            Defaults to `False`
+    :param nc_filterfunc:   Optional function to call on the input video for
+                            filtering before splicing it in.
+    :param use_internal:    Whether or not to use `copy_credits` from this script.
+                            Mutually exclusive with `nc_filterfunc`.
     :param ext_mask:        For when the internal merging function is good enough
-                            but the mask it generates isn't. This will only be
-                            used if `use_internal` is set to `True` and will
-                            be passed on for use in `copy_credits`
+                            but the mask it generates isn't. This is only used
+                            if `use_internal` applies.
     """
     if nc_filterfunc:
         nc = nc_filterfunc(nc, **kwargs)
@@ -49,20 +33,17 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe:
     return out
 
 def copy_credits(source: vs.VideoNode, nc: vs.VideoNode, mask: Optional[vs.VideoNode]=None) -> vs.VideoNode:
-    """ Copy credits from the source to the nc using a diff_mask.
+    """ Copy credits from source to the nc using a mask.
 
-    This function assumes there is no notable difference between the NC and the
-    source clip so that the internal mask is gonna catch nothing but
-    credits and perhaps a few stray pixels.
-    Returns the NC with the credits merged in from the source.
+    This function internally calls `detail_mask` which is meant for descales.
+    As such, it assumes the NC doesn't have major differences with the source
+    as they are provided. Assumes both inputs have the same length.
 
-    :param source:      The clip to take the credits from. If you need them from
-                        a subsection of the full clip, slice it yourself.
-    :param nc:          The NC to copy the credits into
-    :param mask:        Optionally an external mask to use for copying over the
-                        credits if the detail_mask doesn't do a good enough job.
+    :param source:      The clip to take the credits from.
+    :param nc:          The NC to copy the credits into.
+    :param mask:        Optional, an external mask to use.
     """
-    mask = _mask(source,nc) if not mask else mask
+    mask = detail_mask(source, nc) if not mask else mask
     return core.std.MaskedMerge(nc, source, mask)
 
 # Immediately make a credit mask
@@ -81,15 +62,10 @@ def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
                         the luma plane will be extracted.
     :param b:           b value for the descaler, defaults to 1/3.
     :param c:           c value for the descaler, defaults to 1/3.
-    :param height:      The height to descale to in order to get the error rate
-                        difference correct for the source. Width will be
-                        calculated using the ratios of the source.
-    :param absthresh:   The abs threshold to use for the Expression used to
-                        generate the actual mask.
-    :param iters:       How often to iterate calls to core.std.Maximum and
-                        core.std.Inflate for the mask.
-    :param descaler:    The descaling function to call, defaults to None and
-                        then gets set to core.descale.Debicubic.
+    :param height:      The height to descale to for a correct error rate.
+    :param absthresh:   The abs threshold for binarizing the mask with.
+    :param iters:       How often to iterate Maximum and Inflate calls on the mask.
+    :param descaler:    The descaling function to use, defaults to Debicubic.
     :param upscaler:    The upscaling function, defaults to Bicubic.
     :param dekwargs:    A dict with extra options for the descaler.
     :param upkwargs:    A dict with extra options for the upscaler.
@@ -106,16 +82,11 @@ def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
     return mask
 
 def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float=0.05) -> vs.VideoNode:
-    """ Generates a fairly basic detail mask
+    """ Generates a fairly basic detail mask, mostly for descaling purposes.
 
-    This was originally part of `questionable_descale`'s internal logic, but
-    the detail mask can be used in more places as well. The mask is pretty coarse
-    and grabs a bit more than it'd strictly need, but you can mess with the thresh
-    if you need it to pick up more or less.
     This is mostly used to pick up on detail _lost_ in `questionable_descale` as
-    per Zastin's original script. That said, the mask serves other typical uses
-    as well. For example grabbing credits and native different res elements in
-    the source clip.
+    per Zastin's original script. Catches most if not all elements in a different
+    native resolution
 
     :param source:      The clip to generate the mask for.
     :param rescaled:    The descaled and re-upscaled clip where detail was lost.
@@ -140,19 +111,14 @@ def dehalo_mask(clip: vs.VideoNode,
     any conversions properly before calling this function with a clip.
 
     :param clip:        The clip to generate the mask for
-    :param maskgen:     The function to call for making the mask,
-                        Defaults to `core.std.Prewitt` but any other
-                        callable may be used
+    :param maskgen:     The function to call for making the mask, default Prewitt.
     :param iter_out:    Amount of times to iterate expansion for the outer mask
                         Defaults to 2, the standard size
     :param iter_in:     Amount of times to iterate impansion for the inner mask
-                        Defaults to `iter_out+1`. Negative values make it calculate
-                        this default, default value is -1
-    :param inner:       Whether or not to return the inner mask, useful for
-                        finetuning.
-    :param outer:       Whether or not to return the outer mask, useful for
-                        finetuning.
-    Remaining args will be collected and expanded as args for `maskgen`
+                        Defaults to `iter_out+1`.
+    :param inner:       Returns the inner mask for checking.
+    :param outer:       Returns the outer mask for checking.
+    :param mask_args:   Expanded as **kwargs for `mask_gen`
     """
     maskgen = core.std.Prewitt if maskgen is None else maskgen
     mask = maskgen(clip, **mask_args) if mask_args else maskgen(clip, 0)
@@ -172,27 +138,22 @@ def questionable_rescale(
     from nnedi3_rpow2 import nnedi3_rpow2 as rpow2
     """ Descale function originally written by Zastin, edited by me.
 
-    It's originally written for Doga Kobo, since they have some weird post-processing going on
-    that may include super dark or super bright pixels in areas they shouldn't be, as well as
-    making a normal descale impossible. It applies clamping to pixels with extremely blown up
-    values if they seem out of place, as well as some Expr magic for error correction on the
-    source. Use at your own risk. Added the descaler as an arg and included the actual descale.
+    It's originally written for Doga Kobo material, since they have some weird
+    post-processing going on, making a normal descale impossible. It applies
+    some Expression magic for fixing some common Doga Kobo issues.
+    USE AT YOUR OWN RISK.
 
-    :param clip:            Input clip, ``vsutil.depth(clip, 16)`` will be called if this is not
-                            16 or less bits integer format. Clip must be YUV
-    :param height:          The height to descale to. Proper width will be calculated.
-    :param b:               The `b` or `filter_param_a` value for the descale
-    :param c:               The `c` or `filter_param_b` value for the descale
-    :param descaler:        The descaler to use. Will use ``core.descale.Debicubic`` by default
-    :param correct_shift:   Same as in ``nnedi3_rpow2``
-    :param apply_mask:      Whether or not to apply a detail mask
-    :param mask_thresh:     Threshold for binarizing the default mask
-    :param ext_mask:        Supply your own instead of the default
-    :param return_mask:     Whether to return the mask used instead of the clip
-
-    :return:                An error-corrected clip in the input resolution when pass2=False, or
-                            a reupscaled clip in the input resolution when pass2=True.
-                            Output depth will be the same as input depth.
+    :param clip:            YUV input clip, integer format. Will be dithered
+                            down if required.
+    :param height:          The height to descale to.
+    :param b:               The `b` or `filter_param_a` value for the descale.
+    :param c:               The `c` or `filter_param_b` value for the descale.
+    :param descaler:        The descaler to use. Will use Debicubic by default.
+    :param correct_shift:   Same as in `nnedi3_rpow2`.
+    :param apply_mask:      Whether or not to apply a detail mask.
+    :param mask_thresh:     Threshold for binarizing the default mask.
+    :param ext_mask:        Supply your own mask instead of the default.
+    :param return_mask:     Whether to return the mask used instead of the clip.
     """
     if not descaler:
         descaler = core.descale.Debicubic
