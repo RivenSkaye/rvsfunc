@@ -1,6 +1,7 @@
 import vapoursynth as vs
 import vsutil
 from typing import Any, Dict, Callable, Optional
+from math import ceil, floor
 core = vs.core
 
 def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe: int,
@@ -129,6 +130,23 @@ def dehalo_mask(clip: vs.VideoNode,
     minn = vsutil.iterate(mout, core.std.Minimum, iter_in)
     if inner: return minn
     return core.std.Expr([mout, minn], "x y -")
+
+def fineline_mask(clip: vs.VideoNode, thresh: int=95):
+    """ Generates a very fine mask for lineart protection. Not perfect yet
+    The generated mask is GRAY8, keep this in mind for conversions.
+
+    :param clip:        The clip to generate the mask for.
+    :param thresh:      The threshold for the binarization step.
+    """
+    prew = core.std.Prewitt(clip, planes=[0])
+    thin = core.std.Minimum(prew)
+    yp = vsutil.get_y(prew)
+    yt = vsutil.get_y(thin)
+    maska = core.std.Expr([ys, yt], ["x y < y x ?"])
+    bin_mask = core.std.Binarize(maska, threshold=thresh)
+    redo = int(floor(thresh/2.5)*2)
+    mask_out = core.std.Expr([bin_mask, mask_a], [f"x y < y x ? {pass2} < 0 255 ?"])
+    return mask_out
 
 def questionable_rescale(
     clip: vs.VideoNode, height: int, b: float=1/3, c: float=1/3,
