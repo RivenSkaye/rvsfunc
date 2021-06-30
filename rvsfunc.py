@@ -282,7 +282,7 @@ def chromashifter(clip: vs.VideoNode, horizontal: bool=True, vertical: bool=Fals
     if diagonal:
         raise vs.Error("chromashifter: Finding diagonal shifts is hell, so no way!")
     if horizontal and vertical:
-        raise vs.Error("There is no guarantee that bidirectional will work. \
+        print("There is no guarantee that bidirectional will work. \
                        You'd be best off doing one direction manually first.")
 
     if horizontal:
