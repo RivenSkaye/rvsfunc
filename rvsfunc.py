@@ -1,7 +1,8 @@
 import vapoursynth as vs
+from functools import partial
 import vsutil
 from typing import Any, Dict, Callable, Optional
-from math import ceil, floor
+from math import floor
 core = vs.core
 
 def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe: int,
@@ -206,3 +207,90 @@ def questionable_rescale(
         doubled = core.std.MaskedMerge(doubled, y, mask)
     if chroma: doubled = vsutil.join([doubled,u,v])
     return vsutil.depth(doubled, depth_in)
+
+def chromashifter(clip: vs.VideoNode, horizontal: bool=True, vertical: bool=False, diagonal: bool=False) -> vs.VideoNode:
+    """ Automatically fixes chroma shifts, at the very least by approximation.
+
+    This function takes in a clip and first upscales chroma to YUV444P8, then
+    it proceeds to supersample the clip x4. Then edgemasks are generated over
+    the separated planes. Then the shifts are calculated on a frame by frame
+    basis and applied on the original input clip. The rest of the video remains
+    completely untouched.
+    Assumes the shift is the same for the U and V planes.
+
+    :param clip: vs.VideoNode:  The clip to process. This may take a while.
+    :return: vs.VideoNode:      The input clip, but without chroma shift.
+    """
+    def _getWhiteRows(frameArr):
+        whites = {}
+        r = 0
+        for row in frameArr:
+            p = 0
+            for pixel in row:
+                if pixel > 31:
+                    whites[r] = p
+                    break # We only want the first white in the row
+                p += 1
+            r += 1
+        return whites
+
+    def _getWhiteInRow(frameArr, row):
+        p = 0
+        for pixel in frameArr[row]:
+            if pixel > 31: return p
+            p += 1
+        return -1
+
+    def _eval(n, f, yOG, uOG, vOG):
+        print(f"Frame {n+1}")
+        ya = f[0].get_read_array(0)
+        ua = f[1].get_read_array(0)
+        va = f[2].get_read_array(0)
+        yWC = _getWhiteRows(ya)
+        rows = yWC.keys()
+        shifts = []
+        for r in rows:
+            uWC = _getWhiteInRow(ua, r)
+            vWC = _getWhiteInRow(va, r)
+            try: # some edgecase frames produce 0 divisions
+                if uWC > -1:
+                    shifts.append(256/round(32*(((uWC-yWC[r])+1)/8)))
+                elif vWC > -1:
+                    shifts.append(256/round(32*(((uWC-yWC[r])+1)/8)))
+            except:
+                continue
+        try:
+            shift = (sum(shifts)/len(shifts))
+            if shift > 2 or shift < -2:
+                corr = round(shift)/1
+                shift = shift-corr
+        except:
+            shift = 0
+        thisY = yOG
+        thisU = uOG.resize.Point(src_left=shift)
+        thisV = vOG.resize.Point(src_left=shift)
+        thisFrame = vsutil.join([thisY, thisU, thisV])
+        return thisFrame
+
+    yOG, uOG, vOG = vsutil.split(clip)
+    yuv = clip.resize.Spline36(height=clip.height*4, width=clip.width*4, format=vs.YUV444P8)
+    y, u, v = vsutil.split(yuv)
+    ymask = y.std.Prewitt()
+    umask = u.std.Prewitt()
+    vmask = v.std.Prewitt()
+
+    if diagonal:
+        raise vs.Error("chromashifter: Finding diagonal shifts is hell, so no way!")
+    if horizontal and vertical:
+        raise vs.Error("There is no guarantee that bidirectional will work. \
+                       You'd be best off doing one direction manually first.")
+
+    if horizontal:
+        out = clip.std.FrameEval(partial(_eval, yOG=yOG, uOG=uOG, vOG=vOG),
+                                 prop_src=[ymask, umask, vmask])
+    else: out = clip
+    if vertical:
+        out = out.std.Transpose()
+        out = out.std.FrameEval(partial(_eval, yOG=yOG, uOG=uOG, vOG=vOG),
+                                 prop_src=[ymask, umask, vmask]).std.Transpose()
+    return out
