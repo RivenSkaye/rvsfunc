@@ -218,8 +218,18 @@ def chromashifter(clip: vs.VideoNode, horizontal: bool=True, wthresh: int=31,
     basis and applied on the original input clip. The rest of the video remains
     completely untouched.
     Assumes the shift is the same for the U and V planes.
+    This DOES NOT work for bidirectional chroma shifts! If you must fix them in
+    both horizontal and vertical directions, fix one manually or try your luck
+    by running this function twice. Or thrice. It probably won't be enough and
+    really damage your video though.
 
     :param clip: vs.VideoNode:  The clip to process. This may take a while.
+    :param horizontal: bool:    Whether or not to fix a horizontal shift.
+    :param wthresh: int:        The threshold for white values to use in the
+                                calculations for proper shifting.
+                                This has not been properly tested yet!
+    :param vertical: bool:      Whether or not to perform the shift vertically.
+    :param diagonal: bool:      Not even once.
     :return: vs.VideoNode:      The input clip, but without chroma shift.
     """
     def _getWhiteRows(frameArr, wthresh):
