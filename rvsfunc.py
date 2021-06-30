@@ -208,7 +208,8 @@ def questionable_rescale(
     if chroma: doubled = vsutil.join([doubled,u,v])
     return vsutil.depth(doubled, depth_in)
 
-def chromashifter(clip: vs.VideoNode, horizontal: bool=True, vertical: bool=False, diagonal: bool=False) -> vs.VideoNode:
+def chromashifter(clip: vs.VideoNode, horizontal: bool=True, wthresh: int=31,
+                  vertical: bool=False, diagonal: bool=False) -> vs.VideoNode:
     """ Automatically fixes chroma shifts, at the very least by approximation.
 
     This function takes in a clip and first upscales chroma to YUV444P8, then
@@ -221,23 +222,23 @@ def chromashifter(clip: vs.VideoNode, horizontal: bool=True, vertical: bool=Fals
     :param clip: vs.VideoNode:  The clip to process. This may take a while.
     :return: vs.VideoNode:      The input clip, but without chroma shift.
     """
-    def _getWhiteRows(frameArr):
+    def _getWhiteRows(frameArr, wthresh):
         whites = {}
         r = 0
         for row in frameArr:
             p = 0
             for pixel in row:
-                if pixel > 31:
+                if pixel > wthresh:
                     whites[r] = p
                     break # We only want the first white in the row
                 p += 1
             r += 1
         return whites
 
-    def _getWhiteInRow(frameArr, row):
+    def _getWhiteInRow(frameArr, row, wthresh):
         p = 0
         for pixel in frameArr[row]:
-            if pixel > 31: return p
+            if pixel > wthresh: return p
             p += 1
         return -1
 
@@ -246,17 +247,20 @@ def chromashifter(clip: vs.VideoNode, horizontal: bool=True, vertical: bool=Fals
         ya = f[0].get_read_array(0)
         ua = f[1].get_read_array(0)
         va = f[2].get_read_array(0)
-        yWC = _getWhiteRows(ya)
+        yWC = _getWhiteRows(ya, wthresh)
         rows = yWC.keys()
         shifts = []
         for r in rows:
-            uWC = _getWhiteInRow(ua, r)
-            vWC = _getWhiteInRow(va, r)
+            uWC = _getWhiteInRow(ua, r, wthresh)
+
             try: # some edgecase frames produce 0 divisions
                 if uWC > -1:
-                    shifts.append(256/round(32*(((uWC-yWC[r])+1)/8)))
-                elif vWC > -1:
-                    shifts.append(256/round(32*(((uWC-yWC[r])+1)/8)))
+                    shifts.append(256/round((wthresh+1)*(((uWC-yWC[r])+1)/8)))
+                    continue
+                # don't make this call unless required!
+                vWC = _getWhiteInRow(va, r, wthresh)
+                if vWC > -1:
+                    shifts.append(256/round((wthresh+1)*(((uWC-yWC[r])+1)/8)))
             except:
                 continue
         try:
@@ -282,15 +286,14 @@ def chromashifter(clip: vs.VideoNode, horizontal: bool=True, vertical: bool=Fals
     if diagonal:
         raise vs.Error("chromashifter: Finding diagonal shifts is hell, so no way!")
     if horizontal and vertical:
-        print("There is no guarantee that bidirectional will work. \
-                       You'd be best off doing one direction manually first.")
+        raise vs.Error("There is no guarantee that bidirectional will work. \
+                       If you must, do one by one. Repeatedly.")
 
     if horizontal:
         out = clip.std.FrameEval(partial(_eval, yOG=yOG, uOG=uOG, vOG=vOG),
                                  prop_src=[ymask, umask, vmask])
-    else: out = clip
     if vertical:
-        out = out.std.Transpose()
-        out = out.std.FrameEval(partial(_eval, yOG=yOG, uOG=uOG, vOG=vOG),
+        clip = clip.std.Transpose()
+        out = clip.std.FrameEval(partial(_eval, yOG=yOG, uOG=uOG, vOG=vOG),
                                  prop_src=[ymask, umask, vmask]).std.Transpose()
     return out
