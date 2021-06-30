@@ -243,7 +243,6 @@ def chromashifter(clip: vs.VideoNode, horizontal: bool=True, wthresh: int=31,
         return -1
 
     def _eval(n, f, yOG, uOG, vOG):
-        print(f"Frame {n+1}")
         ya = f[0].get_read_array(0)
         ua = f[1].get_read_array(0)
         va = f[2].get_read_array(0)
