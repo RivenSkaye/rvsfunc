@@ -1,8 +1,10 @@
-import vapoursynth as vs
-from functools import partial
-import vsutil
 from typing import Any, Dict, Callable, Optional
 from math import floor
+from functools import partial
+
+import numpy
+import vapoursynth as vs
+import vsutil
 core = vs.core
 
 def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe: int,
