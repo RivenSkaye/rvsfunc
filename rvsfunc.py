@@ -2,7 +2,7 @@ from typing import Any, Dict, Callable, Optional
 from math import floor
 from functools import partial
 
-import numpy
+import numpy as np
 import vapoursynth as vs
 import vsutil
 core = vs.core
