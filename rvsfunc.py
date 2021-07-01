@@ -261,15 +261,13 @@ def chromashifter(clip: vs.VideoNode, horizontal: bool=True, wthresh: int=31,
         shifts = []
         for r in rows:
             uWC = _getWhiteInRow(ua, r, wthresh)
-
+            vWC = _getWhiteInRow(va, r, wthresh)
             try: # some edgecase frames produce 0 divisions
-                if uWC > -1:
+                if uWC > -1 and uWC <= vWC:
                     shifts.append(256/round((wthresh+1)*(((uWC-yWC[r])+1)/8)))
                     continue
-                # don't make this call unless required!
-                vWC = _getWhiteInRow(va, r, wthresh)
                 if vWC > -1:
-                    shifts.append(256/round((wthresh+1)*(((uWC-yWC[r])+1)/8)))
+                    shifts.append(256/round((wthresh+1)*(((vWC-yWC[r])+1)/8)))
             except:
                 continue
         try:
