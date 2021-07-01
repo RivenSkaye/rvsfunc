@@ -208,99 +208,70 @@ def questionable_rescale(
     if chroma: doubled = vsutil.join([doubled,u,v])
     return vsutil.depth(doubled, depth_in)
 
-def chromashifter(clip: vs.VideoNode, horizontal: bool=True, wthresh: int=31,
-                  vertical: bool=False, diagonal: bool=False) -> vs.VideoNode:
-    """ Automatically fixes chroma shifts, at the very least by approximation.
-
+def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False) -> vs.VideoNode:
+    """Automatically fixes chroma shifts, at the very least by approximation.
     This function takes in a clip and first upscales chroma to YUV444P8, then
     it proceeds to supersample the clip x4. Then edgemasks are generated over
     the separated planes. Then the shifts are calculated on a frame by frame
     basis and applied on the original input clip. The rest of the video remains
     completely untouched.
     Assumes the shift is the same for the U and V planes.
-    This DOES NOT work for bidirectional chroma shifts! If you must fix them in
-    both horizontal and vertical directions, fix one manually or try your luck
-    by running this function twice. Or thrice. It probably won't be enough and
-    really damage your video though.
+    Actually fast now thanks to EoE :eoehead:
 
     :param clip: vs.VideoNode:  The clip to process. This may take a while.
-    :param horizontal: bool:    Whether or not to fix a horizontal shift.
     :param wthresh: int:        The threshold for white values to use in the
                                 calculations for proper shifting.
                                 This has not been properly tested yet!
     :param vertical: bool:      Whether or not to perform the shift vertically.
-    :param diagonal: bool:      Not even once.
     :return: vs.VideoNode:      The input clip, but without chroma shift.
     """
-    def _getWhiteRows(frameArr, wthresh):
-        whites = {}
-        r = 0
-        for row in frameArr:
-            p = 0
-            for pixel in row:
-                if pixel > wthresh:
-                    whites[r] = p
-                    break # We only want the first white in the row
-                p += 1
-            r += 1
-        return whites
 
-    def _getWhiteInRow(frameArr, row, wthresh):
-        p = 0
-        for pixel in frameArr[row]:
-            if pixel > wthresh: return p
-            p += 1
-        return -1
+    def frame_to_array(frame: vs.VideoFrame) -> np.ndarray:
+        frame_array = []
+        for plane in range(frame.format.num_planes):
+            plane_array = np.array(frame.get_read_array(plane), copy=False)
+            frame_array.append(plane_array.reshape(list(plane_array.shape) + [1]))
+        return np.concatenate(frame_array, axis=2)
 
-    def _eval(n, f, yOG, uOG, vOG):
-        ya = f[0].get_read_array(0)
-        ua = f[1].get_read_array(0)
-        va = f[2].get_read_array(0)
-        yWC = _getWhiteRows(ya, wthresh)
-        rows = yWC.keys()
+    def get_shifted(n: int, f: vs.VideoFrame) -> int:
+        array = frame_to_array(f)
+        array_above = array > wthresh
+        row_first = np.argmax(array_above, axis=1)
+        # print(row_first[:, 0])
         shifts = []
-        for r in rows:
-            uWC = _getWhiteInRow(ua, r, wthresh)
-            vWC = _getWhiteInRow(va, r, wthresh)
-            try: # some edgecase frames produce 0 divisions
-                if uWC > -1 and uWC <= vWC:
-                    shifts.append(256/round((wthresh+1)*(((uWC-yWC[r])+1)/8)))
+        for row, luma_col in enumerate(row_first[:, 0]):
+            if not array_above[row, luma_col, 0]:
+                continue
+            try:  # some edgecase frames produce 0 divisions
+                if (
+                    array_above[row, row_first[row, 1], 1]
+                    and row_first[row, 1] <= row_first[row, 2]
+                ):
+                    shifts.append(
+                        256 / round((wthresh + 1) * (((row_first[row, 1] - luma_col) + 1) / 8))
+                    )
                     continue
-                if vWC > -1:
-                    shifts.append(256/round((wthresh+1)*(((vWC-yWC[r])+1)/8)))
-            except:
+                if array_above[row, row_first[row, 2], 2]:
+                    shifts.append(
+                        256 / round((wthresh + 1) * (((row_first[row, 2] - luma_col) + 1) / 8))
+                    )
+            except ZeroDivisionError:
                 continue
         try:
-            shift = (sum(shifts)/len(shifts))
+            shift = sum(shifts) / len(shifts)
             if shift > 2 or shift < -2:
-                corr = round(shift)/1
-                shift = shift-corr
-        except:
+                shift = shift - round(shift)
+        except ZeroDivisionError:
             shift = 0
-        thisY = yOG
-        thisU = uOG.resize.Point(src_left=shift)
-        thisV = vOG.resize.Point(src_left=shift)
-        thisFrame = vsutil.join([thisY, thisU, thisV])
-        return thisFrame
+        return core.resize.Point(clip, src_left=shift * 2)
 
-    yOG, uOG, vOG = vsutil.split(clip)
-    yuv = clip.resize.Spline36(height=clip.height*4, width=clip.width*4, format=vs.YUV444P8)
-    y, u, v = vsutil.split(yuv)
-    ymask = y.std.Prewitt()
-    umask = u.std.Prewitt()
-    vmask = v.std.Prewitt()
-
-    if diagonal:
-        raise vs.Error("chromashifter: Finding diagonal shifts is hell, so no way!")
-    if horizontal and vertical:
-        raise vs.Error("There is no guarantee that bidirectional will work. \
-                       If you must, do one by one. Repeatedly.")
-
-    if horizontal:
-        out = clip.std.FrameEval(partial(_eval, yOG=yOG, uOG=uOG, vOG=vOG),
-                                 prop_src=[ymask, umask, vmask])
     if vertical:
-        clip = clip.std.Transpose()
-        out = clip.std.FrameEval(partial(_eval, yOG=yOG, uOG=uOG, vOG=vOG),
-                                 prop_src=[ymask, umask, vmask]).std.Transpose()
+        clip = core.std.Transpose(clip)
+    yuv = clip.resize.Spline36(height=clip.height * 4, width=clip.width * 4, format=vs.YUV444P8)
+    yuv = core.std.Prewitt(yuv, planes=[0, 1, 2])
+
+    out = core.std.FrameEval(clip, get_shifted, yuv)
+    out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)
+    if vertical:
+        out = core.std.Transpose(out)
     return out
