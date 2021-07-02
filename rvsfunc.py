@@ -3,8 +3,8 @@ from math import floor
 from functools import partial
 
 import numpy as np
-import vapoursynth as vs
 import vsutil
+import vapoursynth as vs
 core = vs.core
 
 def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe: int,
@@ -207,7 +207,7 @@ def questionable_rescale(
 
 def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                   maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.std.Prewitt,
-                  mask_kwargs: Dict={"planes": [0,1,2]}) -> vs.VideoNode:
+                  mask_kwargs: Dict={}) -> vs.VideoNode:
     """ Automatically fixes chroma shifts, at the very least by approximation.
     This function takes in a clip and scales it to a 4x larger YUV444P clip.
     It then generates edgemasks over all of the planes to be used in distance
@@ -226,8 +226,9 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
     :param maskfunc: Callable   A custom function or plugin to call for the
                                 edgemask generation. Default `core.std.Prewitt`.
     :param mask_kwargs: Dict    A dictionary of kwargs to be expanded when calling
-                                mask_func. Defaults to Prewitt's `planes` arg to
-                                ensure a mask is generated over all planes.
+                                mask_func. If defaults are used, this will be
+                                padded with Prewitt's planes arg to ensure all
+                                planes get a mask generated over them.
     :return: vs.VideoNode:      The input clip, but without chroma shift.
     """
     _fname = "rvsfunc chromashifter:"
@@ -280,6 +281,8 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
     if vertical:
         clip = core.std.Transpose(clip)
     yuv = clip.resize.Spline36(height=clip.height * 4, width=clip.width * 4, format=vs.YUV444P8)
+    if maskfunc is core.std.Prewitt:
+        mask_kwargs["planes"] = [0,1,2]
     yuv = maskfunc(yuv, **mask_kwargs)
 
     out = core.std.FrameEval(clip, get_shifted, yuv)
