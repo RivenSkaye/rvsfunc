@@ -53,8 +53,8 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode, mask: Optional[vs.Video
 # Immediately make a credit mask
 def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
                  height: int=720, absthresh: float=0.060, iters: int=4,
-                 descaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=None,
-                 upscaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=None,
+                 descaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.descale.Debicubic,
+                 upscaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.resize.Bicubic,
                  dekwargs: dict={}, upkwargs: dict={}) -> vs.VideoNode:
     """ Credit masking function borrowed from Scrad.
 
@@ -76,8 +76,6 @@ def Scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
     """
     luma = vsutil.get_y(luma)
     luma = vsutil.depth(luma, 32)
-    descaler = core.descale.Debicubic if not descaler else descaler
-    upscaler = core.resize.Bicubic if not upscaler else upscaler
     descaled = descaler(luma, vsutil.get_w(height, luma.width/luma.height), height, b=b, c=c, **dekwargs)
     rescaled = upscaler(descaled, luma.width, luma.height, **upkwargs)
     mask = core.std.Expr([luma, rescaled], f'x y - abs {absthresh} < 0 1 ?')
@@ -105,7 +103,7 @@ def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float=0.05
     return mask
 
 def dehalo_mask(clip: vs.VideoNode,
-    maskgen: Callable[[vs.VideoNode, Any], vs.VideoNode]=None,
+    maskgen: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.std.Prewitt,
     iter_out: int=2, iter_in: int=-1, inner: bool=False, outer: bool=False,
     **mask_args) -> vs.VideoNode:
     """ Lazy wrapper for making a dehalo mask.
@@ -124,7 +122,6 @@ def dehalo_mask(clip: vs.VideoNode,
     :param outer:       Returns the outer mask for checking.
     :param mask_args:   Expanded as **kwargs for `mask_gen`
     """
-    maskgen = core.std.Prewitt if maskgen is None else maskgen
     mask = maskgen(clip, **mask_args) if mask_args else maskgen(clip, 0)
     luma = core.std.ShufflePlanes(mask, 0, colorfamily=vs.GRAY)
     mout = vsutil.iterate(luma, core.std.Maximum, iter_out)
@@ -153,7 +150,7 @@ def fineline_mask(clip: vs.VideoNode, thresh: int=95):
 
 def questionable_rescale(
     clip: vs.VideoNode, height: int, b: float=1/3, c: float=1/3,
-    descaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=None,
+    descaler: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.descale.Debicubic,
     correct_shift: bool=True, apply_mask: bool=True, mask_thresh: float=0.05,
     ext_mask: vs.VideoNode=None, return_mask: bool=False) -> vs.VideoNode:
     from nnedi3_rpow2 import nnedi3_rpow2 as rpow2
@@ -176,8 +173,6 @@ def questionable_rescale(
     :param ext_mask:        Supply your own mask instead of the default.
     :param return_mask:     Whether to return the mask used instead of the clip.
     """
-    if not descaler:
-        descaler = core.descale.Debicubic
     depth_in = vsutil.get_depth(clip)
     if vsutil.get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:
         clip = vsutil.depth(clip, 16, sample_type=vs.INTEGER)
@@ -210,23 +205,38 @@ def questionable_rescale(
     if chroma: doubled = vsutil.join([doubled,u,v])
     return vsutil.depth(doubled, depth_in)
 
-def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False) -> vs.VideoNode:
-    """Automatically fixes chroma shifts, at the very least by approximation.
-    This function takes in a clip and first upscales chroma to YUV444P8, then
-    it proceeds to supersample the clip x4. Then edgemasks are generated over
-    the separated planes. Then the shifts are calculated on a frame by frame
-    basis and applied on the original input clip. The rest of the video remains
-    completely untouched.
+def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
+                  maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.std.Prewitt,
+                  mask_kwargs: Dict={"planes": [0,1,2]}) -> vs.VideoNode:
+    """ Automatically fixes chroma shifts, at the very least by approximation.
+    This function takes in a clip and scales it to a 4x larger YUV444P clip.
+    It then generates edgemasks over all of the planes to be used in distance
+    calculations to figure out the proper value to shift chroma with.
+    The shift is applied to the otherwise untouched input clip.
     Assumes the shift is the same for the U and V planes.
     Actually fast now thanks to EoE :eoehead:
 
     :param clip: vs.VideoNode:  The clip to process. This may take a while.
     :param wthresh: int:        The threshold for white values to use in the
                                 calculations for proper shifting.
-                                This has not been properly tested yet!
+                                Valid values are 1 through 255.
     :param vertical: bool:      Whether or not to perform the shift vertically.
+                                This internally calls `core.std.Transpose` so
+                                that horizontal logic can be applied for speed.
+    :param maskfunc: Callable   A custom function or plugin to call for the
+                                edgemask generation. Default `core.std.Prewitt`.
+    :param mask_kwargs: Dict    A dictionary of kwargs to be expanded when calling
+                                mask_func. Defaults to Prewitt's `planes` arg to
+                                ensure a mask is generated over all planes.
     :return: vs.VideoNode:      The input clip, but without chroma shift.
     """
+    _fname = "rvsfunc chromashifter:"
+    if not clip.format.color_family is vs.YUV:
+        raise vs.Error(f"{_fname} The clip MUST be of the YUV color family. \
+                       Please convert it before calling this function.")
+    if clip.format.num_planes < 3:
+        raise vs.Error(f"{_fname} This function requires all three planes in \
+                       order to calculate proper shifts.")
 
     def frame_to_array(frame: vs.VideoFrame) -> np.ndarray:
         frame_array = []
@@ -270,7 +280,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False)
     if vertical:
         clip = core.std.Transpose(clip)
     yuv = clip.resize.Spline36(height=clip.height * 4, width=clip.width * 4, format=vs.YUV444P8)
-    yuv = core.std.Prewitt(yuv, planes=[0, 1, 2])
+    yuv = maskfunc(yuv, **mask_kwargs)
 
     out = core.std.FrameEval(clip, get_shifted, yuv)
     out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)
