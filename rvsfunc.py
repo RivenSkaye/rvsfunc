@@ -145,7 +145,7 @@ def fineline_mask(clip: vs.VideoNode, thresh: int=95):
     maska = core.std.Expr([ys, yt], ["x y < y x ?"])
     bin_mask = core.std.Binarize(maska, threshold=thresh)
     redo = int(floor(thresh/2.5)*2)
-    mask_out = core.std.Expr([bin_mask, mask_a], [f"x y < y x ? {pass2} < 0 255 ?"])
+    mask_out = core.std.Expr([bin_mask, mask_a], [f"x y < y x ? {redo} < 0 255 ?"])
     return mask_out
 
 def questionable_rescale(
