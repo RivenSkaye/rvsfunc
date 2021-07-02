@@ -272,7 +272,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
         try:
             shift = sum(shifts) / len(shifts)
             if shift > 2 or shift < -2:
-                shift = shift - round(shift)
+                shift = shift - floor(shift)
         except ZeroDivisionError:
             shift = 0
         return core.resize.Point(clip, src_left=shift * 2)
