@@ -207,7 +207,9 @@ def questionable_rescale(
 
 def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                   maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.std.Prewitt,
-                  mask_kwargs: Dict={}) -> vs.VideoNode:
+                  mask_kwargs: Dict={},
+                  shifter: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.resize.Point
+                  ) -> vs.VideoNode:
     """ Automatically fixes chroma shifts, at the very least by approximation.
     This function takes in a clip and scales it to a 4x larger YUV444P clip.
     It then generates edgemasks over all of the planes to be used in distance
@@ -229,6 +231,12 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                                 mask_func. If defaults are used, this will be
                                 padded with Prewitt's planes arg to ensure all
                                 planes get a mask generated over them.
+    :param shifter: Callable:   The function to perform the chroma shift with,
+                                defaults to core.resize.Point.
+                                This MUST take the clip as its first positional
+                                argument and a keyword argument named `src_left`.
+                                Wrap your callable if it doesn't meet these
+                                requirements to prevent errors.
     :return: vs.VideoNode:      The input clip, but without chroma shift.
     """
     _fname = "rvsfunc chromashifter:"
@@ -276,7 +284,8 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                 shift = shift - floor(shift)
         except ZeroDivisionError:
             shift = 0
-        return core.resize.Point(clip, src_left=shift * 2)
+        shift = round(shift * 8)/8
+        return shifter(clip, src_left=shift)
 
     if vertical:
         clip = core.std.Transpose(clip)
