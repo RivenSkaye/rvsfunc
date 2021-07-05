@@ -20,7 +20,7 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe:
     :param startframe:      The frame to start splicing at. This is an inclusive
                             selection value. The selected range is `source[:startframe+1]`.
     :param endframe:        The first frame that needs to be kept. This is an
-                            inclusive selection value, selected as `source[endframe:]`.
+                            inclusive selection value, selected as `source[endframe+1:]`.
     :param nc_filterfunc:   Optional function to call on the input video for
                             filtering before splicing it in.
     :param use_internal:    Whether or not to use `copy_credits` from this script.
@@ -33,10 +33,11 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe:
         nc = nc_filterfunc(nc, **kwargs)
     elif use_internal:
         nc = copy_credits(source[startframe:endframe+1], nc, ext_mask)
-    out = source[:startframe+1] + nc + source[endframe:]
+    out = source[:startframe] + nc + source[endframe+1:]
     return out
 
-def copy_credits(source: vs.VideoNode, nc: vs.VideoNode, mask: Optional[vs.VideoNode]=None) -> vs.VideoNode:
+def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,
+                 mask: Optional[vs.VideoNode]=None) -> vs.VideoNode:
     """ Copy credits from source to the nc using a mask.
 
     This function internally calls `detail_mask` which is meant for descales.
@@ -258,7 +259,6 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
         array = frame_to_array(f)
         array_above = array > wthresh
         row_first = np.argmax(array_above, axis=1)
-        # print(row_first[:, 0])
         shifts = []
         for row, luma_col in enumerate(row_first[:, 0]):
             if not array_above[row, luma_col, 0]:
