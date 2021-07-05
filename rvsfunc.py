@@ -195,7 +195,7 @@ def questionable_rescale(
     diff_a = core.std.Expr([y, err], 'x y - abs')
     cerr = desccy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)
     diff_b = core.std.Expr([cy, cerr], 'x y - abs')
-    pre_descale = core.std.Expr([diff_a,diff_b,y,cy], 'x y - 1000 > x 2500 > and z a ?')
+    pre_descale = core.std.Expr([diff_a,diff_b,y,cy], f'x y - {1000/(1<<16)-1} > x {2500/(1<<16)-1} > and z a ?')
 
     descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)
     doubled = rpow2(descaled, correct_shift=correct_shift).resize.Spline36(clip.width, clip.height)
