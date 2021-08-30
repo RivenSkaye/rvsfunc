@@ -1,4 +1,5 @@
 from typing import Callable, Dict, Any
+from math import floor
 import numpy as np
 import vsutil
 import vapoursynth as vs
@@ -78,10 +79,10 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                 continue
         try:
             shift = sum(shifts) / len(shifts)
-            if shift > 2 or shift < -2:
-                shift = shift - (floor(shift - 1)/3)
+            if shift > 2:
+                shift = shift - (floor(shift - 1)/4)
             elif shift < -2:
-                shift = shift - (floor(shift + 1)/3)
+                shift = shift - (floor(shift + 1)/4)
         except ZeroDivisionError:
             shift = 0
         shift = round(shift * 8)/8
