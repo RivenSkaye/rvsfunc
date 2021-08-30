@@ -1,4 +1,5 @@
 from typing import Any, Dict, Callable, Optional
+from .masking import detail_mask
 import vsutil
 import vapoursynth as vs
 core = vs.core
@@ -53,7 +54,7 @@ def questionable_rescale(
     if scale_kwargs.get("width") == None:
         scale_kwargs['width'] = clip.width
     if scale_kwargs.get("height") == None:
-        scale_kwargs['height'] == clip.height
+        scale_kwargs['height'] = clip.height
     depth_out = vsutil.get_depth(clip) if depth_out < 0 else depth_out
     if vsutil.get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:
         clip = vsutil.depth(clip, 16, sample_type=vs.INTEGER)
@@ -78,7 +79,7 @@ def questionable_rescale(
     pre_descale = core.std.Expr([diff_a,diff_b,y,cy], f'x y - {1000/(1<<16)-1} > x {2500/(1<<16)-1} > and z a ?')
 
     descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)
-    if not upscaler: return descaled
+    if not scaler: return descaled
     doubled = rpow2(descaled, correct_shift=correct_shift)
     doubled = scaler(doubled, **scale_kwargs)
     if apply_mask:
