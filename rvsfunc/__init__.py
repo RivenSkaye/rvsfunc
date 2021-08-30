@@ -1,6 +1,7 @@
-from . import utils
-from . import masking
-from . import dvd
-from . import cursed as voodoo
+from . import utils, masking, dvd, cursed
 
-batch_index = utils.batch_index
+# Alias for script compatibility
+batchindex = utils.batch_index
+
+#aliases for shits and giggles
+voodoo = cursed
