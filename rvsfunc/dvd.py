@@ -82,7 +82,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
             if shift > 2:
                 shift = shift - (floor(shift - 1)/4)
             elif shift < -2:
-                shift = shift - (floor(shift + 1)/4)
+                shift = shift + (floor(shift + 1)/4)
         except ZeroDivisionError:
             shift = 0
         shift = round(shift * 8)/8
