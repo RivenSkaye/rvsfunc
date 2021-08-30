@@ -58,7 +58,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
             frame_array.append(plane_array.reshape(list(plane_array.shape) + [1]))
         return np.concatenate(frame_array, axis=2)
 
-    def get_shifted(n: int, f: vs.VideoFrame) -> int:
+    def get_shifted(n: int, f: vs.VideoFrame) -> vs.VideoNode:
         array = frame_to_array(f)
         array_above = array > wthresh
         row_first = np.argmax(array_above, axis=1)
