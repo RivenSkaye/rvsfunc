@@ -1,4 +1,4 @@
-from Typing import Callable, Dict, Any
+from typing import Callable, Dict, Any
 import numpy as np
 import vsutil
 import vapoursynth as vs
