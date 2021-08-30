@@ -1,6 +1,6 @@
 from . import utils
-from . import masking as masks
-from . import cursed as voodoo
+from . import masking
 from . import dvd
+from . import cursed as voodoo
 
-batch_index = util.batch_index
+batch_index = utils.batch_index

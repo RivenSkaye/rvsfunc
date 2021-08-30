@@ -3,7 +3,7 @@ import vsutil
 import vapoursynth as vs
 core = vs.core
 
-def batchindex(paths: Union[List[str],str], source_filter: Callable[[str], Any],
+def batch_index(paths: Union[List[str],str], source_filter: Callable[[str], Any],
                show_list: bool=False, **src_args: Any) -> List[Any]:
     """ Index sources in batch, provide a list of files to index.
 
@@ -77,4 +77,3 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,
     """
     mask = detail_mask(source, nc) if not mask else mask
     return core.std.MaskedMerge(nc, source, mask)
-
