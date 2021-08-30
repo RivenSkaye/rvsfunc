@@ -5,8 +5,12 @@ import vsutil
 import vapoursynth as vs
 core = vs.core
 
+def eoe_convolution(clip: vs.VideoNode):
+    return clip.std.Convolution(matrix=[-1] * 4 + [8] + [-1] * 4,
+                 planes=[0, 1, 2], saturate=False)
+
 def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
-                  maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.std.Prewitt,
+                  maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode]=eoe_convolution,
                   mask_kwargs: Dict={},
                   shifter: Callable[[vs.VideoNode, Any], vs.VideoNode]=core.resize.Point
                   ) -> vs.VideoNode:
