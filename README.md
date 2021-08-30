@@ -1,22 +1,30 @@
 # rvsfunc
-A collection of vapoursynth functions I wrote to make life easier. There's better alternatives, trust me.
-
-Most of these functions were written for edgecases where their normal counterparts don't work.
-That said, some of it is actually reusable for the more general use cases as well. Good luck
-figuring out which functions you need from this. I feel sorry for you for needing the dependency.
+A collection of vapoursynth functions I wrote or changed to make life easier.
+Most of these were because I'm too lazy for my own good, or out of desperation
+and edgecases.
+That said, most of them were written with reusability and flexibility in mind.
+Good luck figuring out which functions you need, docs coming soon&trade;
 
 # Recommended use
 Like so many other VapourSynth \*func scripts, import it and use the functions inside.
 ```py
 import vapoursynth as vs
-import rvsfunc as rvs # realize you must be desperate if you do this
-import literally_any_good_func as lagf
+import rvsfunc as rvs
+import literally_any_other_func as laof
 ```
 
 # Installation
-Until this thing grows massive and it deserves to be a package, just
-save the `rvsfunc.py` file in your site-packages folder.
+If you were one of the unlucky few to get this thing as a monolithic file,
+then delete that first.
+As for installing this, it's not yet on PyPI, so you'll have to install it using
+the git link.
 
-Alternatively, to keep the VapourSynth stuff separated from all other Python stuff,
-save all of them into `$PYTHONPATH/vsfuncs/`. Or save this specifically to
-`$PYTHONPATH/trash/rvsfunc.py` so you can do `from trash import rvsfunc as rvs`.
+Assuming Python 3.8+ is configured as the default:
+```py
+# windows
+py -m pip install git+https://github.com/RivenSkaye/rvsfunc
+
+# Unix-like OSes
+python -m pip install git+https://github.com/RivenSkaye/rvsfunc
+```
+_Once it's on PyPI, these instructions will change accordingly. If that breaks updating, good luck!_
