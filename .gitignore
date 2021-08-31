@@ -2,7 +2,7 @@
 *.komodoproject
 .komodotools/
 
-# Py stuff
+# Py stuff #
 __pycache__/
 *.py[cod]
 *$py.class
@@ -11,3 +11,9 @@ __pycache__/
 build/
 *egg-info/
 dist/*
+
+# Documentation stuff #
+docs/_build/*
+docs/_static/*
+docs/_templates/*
+docs/make*
