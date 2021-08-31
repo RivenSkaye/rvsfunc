@@ -27,10 +27,10 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                                 calculations for proper shifting.
                                 Valid values are 1 through 255.
     :param vertical: bool:      Whether or not to perform the shift vertically.
-                                This internally calls `core.std.Transpose` so
+                                This internally calls ``core.std.Transpose`` so
                                 that horizontal logic can be applied for speed.
     :param maskfunc: Callable   A custom function or plugin to call for the
-                                edgemask generation. Default `core.std.Prewitt`.
+                                edgemask generation. Default ``core.std.Prewitt``\.
     :param mask_kwargs: Dict    A dictionary of kwargs to be expanded when calling
                                 mask_func. If defaults are used, this will be
                                 padded with Prewitt's planes arg to ensure all
@@ -38,7 +38,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
     :param shifter: Callable:   The function to perform the chroma shift with,
                                 defaults to core.resize.Point.
                                 This MUST take the clip as its first positional
-                                argument and a keyword argument named `src_left`.
+                                argument and a keyword argument named ``src_left``\.
                                 Wrap your callable if it doesn't meet these
                                 requirements to prevent errors.
     :return: vs.VideoNode:      The input clip, but without chroma shift.

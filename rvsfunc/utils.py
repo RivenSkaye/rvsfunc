@@ -8,17 +8,17 @@ def batch_index(paths: Union[List[str],str], source_filter: Callable[[str], Any]
     """ Index sources in batch, provide a list of files to index.
 
     Simple lazy function. Takes a path or a list of paths, indexes them and
-    then frees the memory again before returning on success. If you happen
-    to get any errors or exceptions, this will just raise the same thing again.
+    then frees the memory before returning on success. If you happen to get any
+    errors or exceptions, this will just raise the same thing again.
 
     :param paths:           A single path as a string or a List of paths.
     :param source_filter:   The source filter or indexer method to call. If it
                             doesn't write, make sure to get the list of indexes
                             using show_list.
     :param show_list:       If this is set to True, this function returns the
-                            results of `source_filter(path)` for every path in
+                            results of ``source_filter(path)`` for every path in
                             paths. Might be useful for batches as well as it
-                            would just return the `vs.VideoNode`s returned by
+                            would just return every ``vs.VideoNode`` returned by
                             the calls to source_filter.
     :param **src_args:      Any additional keyword args will be forwarded to
                             to the source filter as provided.
@@ -45,16 +45,16 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int, endframe:
     :param source:          The source clip that needs something replaced
     :param nc:              The clip that needs to be spliced into source
     :param startframe:      The frame to start splicing at. This is an inclusive
-                            selection value. The selected range is `source[:startframe]`.
+                            selection value. The selected range is ``source[:startframe]``\.
     :param endframe:        The first frame that needs to be kept. This is an
-                            inclusive selection value, selected as `source[endframe+1:]`.
+                            inclusive selection value, selected as ``source[endframe+1:]``\.
     :param nc_filterfunc:   Optional function to call on the input video for
                             filtering before splicing it in.
-    :param use_internal:    Whether or not to use `copy_credits` from this script.
-                            Mutually exclusive with `nc_filterfunc`.
+    :param use_internal:    Whether or not to use ``copy_credits`` from this script.
+                            Mutually exclusive with ``nc_filterfunc``\.
     :param ext_mask:        For when the internal merging function is good enough
                             but the mask it generates isn't. This is only used
-                            if `use_internal` applies.
+                            if ``use_internal`` applies.
     """
     if nc_filterfunc:
         nc = nc_filterfunc(nc, **kwargs)
@@ -67,7 +67,7 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,
                  mask: Optional[vs.VideoNode]=None) -> vs.VideoNode:
     """ Copy credits from source to the nc using a mask.
 
-    This function internally calls `detail_mask` which is meant for descales.
+    This function internally calls ``detail_mask`` which is meant for descales.
     As such, it assumes the NC doesn't have major differences with the source
     as they are provided. Assumes both inputs have the same length.
 

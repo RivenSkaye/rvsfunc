@@ -22,30 +22,30 @@ def questionable_rescale(
     :param clip:            YUV input clip, integer format. Will be dithered
                             down if required.
     :param height:          The height to descale to.
-    :param b:               The `b` or `filter_param_a` value for the descale.
-    :param c:               The `c` or `filter_param_b` value for the descale.
+    :param b:               The ``b`` or ``filter_param_a`` value for the descale.
+    :param c:               The ``c`` or ``filter_param_b`` value for the descale.
     :param descaler:        The descaler to use. Will use Debicubic by default.
     :param scaler:          The scaler to use to scale the clip back to the
                             original or provided output resolution. Pass it a
                             function that returns the clip untouched to get the
                             questionably descaled and then doubled clip. Pass
                             None to prevent frame doubling. Defaults to Spline36.
-                            Will be called as `scaler(clip, **scaler_kwargs)`.
+                            Will be called as ``scaler(clip, **scaler_kwargs)``\.
     :param scaler_kwargs:   A kwargs dict for use with the upscaler. Defaults
                             to an empty dict and sets output width and height
                             to the same values as the input clip. Provide the
-                            values for the `width` and `height` keys to change
+                            values for the ``width`` and ``height`` keys to change
                             the output resolution.
-    :param correct_shift:   Same as in `nnedi3_rpow2`.
+    :param correct_shift:   Same as in ``nnedi3_rpow2``\.
     :param apply_mask:      Whether or not to apply a detail mask.
     :param mask_thresh:     Threshold for binarizing the default mask.
     :param ext_mask:        Supply your own mask instead of the default.
     :param depth_out:       The output depth. Values below 0 will cause it to
                             use the depth of the input clip, any other values
-                            will be passed to `vsutil.depth` the way they are
+                            will be passed to ``vsutil.depth`` the way they are
                             with no regards to what may be raised.
     :param return_mask:     Whether to return the mask used instead of the clip.
-                            This requires `scaler` to not be None.
+                            This requires ``scaler`` to not be None.
     """
     if clip.width == 0 or clip.height == 0:
         raise vs.Error("questionable_descale: var-res clips are not supported. \

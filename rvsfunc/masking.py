@@ -38,7 +38,7 @@ def scradit_mask(luma: vs.VideoNode, b: float=1/3, c: float=1/3,
 def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float=0.05) -> vs.VideoNode:
     """ Generates a fairly basic detail mask, mostly for descaling purposes.
 
-    This is mostly used to pick up on detail _lost_ in `questionable_descale` as
+    This is mostly used to pick up on detail _lost_ in ``questionable_descale`` as
     per Zastin's original script. Catches most if not all elements in a different
     native resolution
 
@@ -69,10 +69,10 @@ def dehalo_mask(clip: vs.VideoNode,
     :param iter_out:    Amount of times to iterate expansion for the outer mask
                         Defaults to 2, the standard size
     :param iter_in:     Amount of times to iterate impansion for the inner mask
-                        Defaults to `iter_out+1`.
+                        Defaults to ``iter_out+1``\.
     :param inner:       Returns the inner mask for checking.
     :param outer:       Returns the outer mask for checking.
-    :param mask_args:   Expanded as **kwargs for `mask_gen`
+    :param mask_args:   Expanded as **kwargs for ``mask_gen``
     """
     mask = maskgen(clip, **mask_args) if mask_args else maskgen(clip, 0)
     luma = core.std.ShufflePlanes(mask, 0, colorfamily=vs.GRAY)
