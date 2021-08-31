@@ -27,5 +27,8 @@ setup(
         'Development Status :: 4 - Beta',
         'Natural Language :: English',
         'Topic :: Multimedia :: Graphics'
-    ]
+    ],
+    project_urls={
+        'tracker': 'https://github.com/RivenSkaye/rvsfunc/issues'
+    }
 )
