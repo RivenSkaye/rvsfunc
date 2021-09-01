@@ -78,7 +78,7 @@ def dehalo_mask(clip: vs.VideoNode,
                         Defaults to ``iter_out+1``.
     :param inner:       Returns the inner mask for checking.
     :param outer:       Returns the outer mask for checking.
-    :param mask_args:   Expanded as **kwargs for ``mask_gen``
+    :param mask_args:   Expanded as ``**kwargs`` for ``mask_gen``
     """
     mask = maskgen(clip, **mask_args) if mask_args else maskgen(clip, 0)
     luma = core.std.ShufflePlanes(mask, 0, colorfamily=vs.GRAY)

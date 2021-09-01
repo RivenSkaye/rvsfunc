@@ -22,7 +22,7 @@ def batch_index(paths: Union[List[str], str],
                             paths. Might be useful for batches as well as it
                             would just return every ``vs.VideoNode`` returned by
                             the calls to source_filter.
-    :param **src_args:      Any additional keyword args will be forwarded to
+    :param src_args:        Any additional keyword args will be forwarded to
                             to the source filter as provided.
     """
     src_args = {} if not src_args else src_args
@@ -63,6 +63,10 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
     :param ext_mask:        For when the internal merging is good enough
                             but the mask it generates isn't.
                             This is only used if ``use_internal`` applies.
+    :param kwargs:          Additional keyword args are only expanded when
+                            using an external ``filterfunc``. These are the
+                            keyword arguments to pass to it, not required if
+                            the filterfunc is a ``partial``.
     """
     if nc_filterfunc:
         nc = nc_filterfunc(nc, **kwargs)
