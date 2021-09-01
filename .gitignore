@@ -2,6 +2,7 @@
 *.komodoproject
 .komodotools/
 *.code-workspace
+.vscode/
 
 # Py stuff #
 __pycache__/
