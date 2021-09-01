@@ -1,6 +1,7 @@
 # IDE files #
 *.komodoproject
 .komodotools/
+*.code-workspace
 
 # Py stuff #
 __pycache__/
