@@ -8,7 +8,7 @@ with open('requirements.txt') as rq:
 
 setup(
     name='rvsfunc',
-    version='0.0.1',
+    version='0.0.3',
     author='Riven Skaye',
     author_email='riven@tae.moe',
     description='VapourSynth functions written or modified by Riven Skaye',
@@ -21,11 +21,14 @@ setup(
     zip_safe=False,
     classifiers=[
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3 ::Only',
+        'Programming Language :: Python :: 3 :: Only',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Development Status :: 4 - Beta',
         'Natural Language :: English',
         'Topic :: Multimedia :: Graphics'
-    ]
+    ],
+    project_urls={
+        'tracker': 'https://github.com/RivenSkaye/rvsfunc/issues'
+    }
 )

@@ -1,9 +1,10 @@
 # IDE files #
 *.komodoproject
 .komodotools/
+*.code-workspace
 .vscode/
 
-# Py stuff
+# Py stuff #
 __pycache__/
 *.py[cod]
 *$py.class
@@ -11,3 +12,10 @@ __pycache__/
 .Python
 build/
 *egg-info/
+dist/*
+
+# Documentation stuff #
+docs/_build/*
+docs/_static/*
+docs/_templates/*
+docs/make*

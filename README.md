@@ -19,12 +19,11 @@ then delete that first.
 As for installing this, it's not yet on PyPI, so you'll have to install it using
 the git link.
 
-Assuming Python 3.8+ is configured as the default:
+Assuming Python 3.8+ is configured as the default, otherwise use `python3`:
 ```py
 # windows
-py -m pip install git+https://github.com/RivenSkaye/rvsfunc
+py -m pip install rvsfunc
 
 # Unix-like OSes
-python -m pip install git+https://github.com/RivenSkaye/rvsfunc
+python -m pip install rvsfunc
 ```
-_Once it's on PyPI, these instructions will change accordingly. If that breaks updating, good luck!_
