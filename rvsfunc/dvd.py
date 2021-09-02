@@ -59,7 +59,9 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
             frame_array.append(plane_array.reshape(list(plane_array.shape) + [1])) # noqa 501
         return np.concatenate(frame_array, axis=2)
 
-    def get_shifted(n: int, f: vs.VideoFrame) -> int:
+    shifted_clips: Dict[float, vs.VideoNode] = {0: clip}
+
+    def get_shifted(n: int, f: vs.VideoFrame) -> vs.VideoNode:
         array = frame_to_array(f)
         array_above = array > wthresh
         row_first = np.argmax(array_above, axis=1)
@@ -89,7 +91,11 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
         except ZeroDivisionError:
             shift = 0
         shift = round(shift * 8)/8
-        return shifter(clip, src_left=shift)
+        shifted = shifted_clips.get(shift)
+        if shifted is None:
+            shifted = shifter(clip, src_left=shift)
+            shifted_clips.update({shift: shifted})
+        return shifted
 
     if vertical:
         clip = core.std.Transpose(clip)
