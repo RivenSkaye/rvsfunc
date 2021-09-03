@@ -35,6 +35,7 @@ jobs:
             python -m twine check --strict dist/*
           continue-on-error: false
         - name: Die on failure
+          if: steps.wheel.outcome != 'success' && steps.sdist.outcome != 'success'
           run: exit 1
         - name: Publish to PyPI
           uses: pypa/gh-action-pypi-publish@master
