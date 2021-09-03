@@ -27,7 +27,7 @@ jobs:
           continue-on-error: true
         - name: Build source distribution
           id: sdist
-          run: >-
+          run: |
             python -m build --sdist --outdir dist/
           continue-on-error: true
         - name: Check the output
