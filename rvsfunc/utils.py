@@ -34,7 +34,7 @@ def batch_index(paths: Union[List[str], str],
         if not show_list:
             del sauces
     except Exception as e:
-        raise e
+        raise
     return [] if not show_list else sauces
 
 

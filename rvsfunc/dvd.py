@@ -71,8 +71,8 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                 continue
             try:  # some edgecase frames produce 0 divisions
                 if (
-                    array_above[row, row_first[row, 1], 1]
-                    and row_first[row, 1] <= row_first[row, 2]
+                    array_above[row, row_first[row, 1], 1] and
+                    row_first[row, 1] <= row_first[row, 2]
                 ):
                     shifts.append(
                         256 / round((wthresh + 1) * (((row_first[row, 1] - luma_col) + 1) / 8)) # noqa 501
@@ -90,7 +90,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                 shift = shift - (floor(shift) / 2)
         except ZeroDivisionError:
             shift = 0
-        shift = round(shift * 8)/8
+        shift = round(shift * 8) / 8
         shifted = shifted_clips.get(shift)
         if shifted is None:
             shifted = shifter(clip, src_left=shift)
@@ -107,6 +107,4 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
 
     out = core.std.FrameEval(clip, get_shifted, yuv)
     out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)
-    if vertical:
-        out = core.std.Transpose(out)
-    return out
+    return out.std.Transpose() if not vertical else out
