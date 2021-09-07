@@ -36,7 +36,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                                 mask_func. If defaults are used, this will be
                                 padded with Prewitt's planes arg to ensure all
                                 planes get a mask generated over them.
-    :param shifter: Callable:   The function to perform the chroma shift with,
+    :param shifter: Callable:   The function to perform the chromashift with,
                                 defaults to core.resize.Point.
                                 This MUST take the clip as its first positional
                                 argument and a kwarg named ``src_left``.
@@ -107,4 +107,4 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
 
     out = core.std.FrameEval(clip, get_shifted, yuv)
     out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)
-    return out.std.Transpose() if not vertical else out
+    return out.std.Transpose() if vertical else out
