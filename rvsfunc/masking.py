@@ -33,10 +33,10 @@ def scradit_mask(luma: vs.VideoNode, b: float = 1/3, c: float = 1/3,
     descaled = descaler(luma, vsutil.get_w(height, luma.width/luma.height),
                         height, b=b, c=c, **dekwargs)
     rescaled = upscaler(descaled, luma.width, luma.height, **upkwargs)
-    mask = core.std.Expr([luma, rescaled], f'x y - abs {absthresh} < 0 1 ?')
+    mask = core.std.Expr([luma, rescaled], f"x y - abs {absthresh} < 0 1 ?")
     mask = vsutil.iterate(mask, core.std.Maximum, iters)
     mask = vsutil.iterate(mask, core.std.Inflate, iters)
-    return mask
+    return mask  # noqa:R504
 
 
 def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode,
@@ -54,10 +54,10 @@ def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode,
     sy = vsutil.get_y(source)
     ry = vsutil.get_y(rescaled)
     sy = core.resize.Point(sy, format=ry.format.id) if not sy.format.id == ry.format.id else sy # noqa 501
-    mask = core.std.Expr([sy, ry], 'x y - abs').std.Binarize(thresh)
+    mask = core.std.Expr([sy, ry], "x y - abs").std.Binarize(thresh)
     mask = vsutil.iterate(mask, core.std.Maximum, 4)
     mask = vsutil.iterate(mask, core.std.Inflate, 4)
-    return mask
+    return mask  # noqa:R504
 
 
 def dehalo_mask(clip: vs.VideoNode,
@@ -106,6 +106,5 @@ def fineline_mask(clip: vs.VideoNode, thresh: int = 95):
     maska = core.std.Expr([yp, yt], ["x y < y x ?"])
     bin_mask = core.std.Binarize(maska, threshold=thresh)
     redo = int(floor(thresh/2.5)*2)
-    mask_out = core.std.Expr([bin_mask, maska],
-                             [f"x y < y x ? {redo} < 0 255 ?"])
-    return mask_out
+    return core.std.Expr([bin_mask, maska],
+                         [f"x y < y x ? {redo} < 0 255 ?"])

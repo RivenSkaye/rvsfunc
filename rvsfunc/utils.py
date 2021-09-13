@@ -33,7 +33,7 @@ def batch_index(paths: Union[List[str], str],
             sauces.append(source_filter(p, **src_args))
         if not show_list:
             del sauces
-    except Exception as e:
+    except Exception:
         raise
     return [] if not show_list else sauces
 
@@ -72,8 +72,7 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
         nc = nc_filterfunc(nc, **kwargs)
     elif use_internal:
         nc = copy_credits(source[startframe:endframe+1], nc, ext_mask)
-    out = source[:startframe] + nc + source[endframe+1:]
-    return out
+    return source[:startframe] + nc + source[endframe+1:]
 
 
 def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,
