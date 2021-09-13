@@ -10,7 +10,8 @@ extend-exclude =
     __pycache__,
     *.egg-info,
     setup.cfg,
-    setup.py
+    setup.py,
+    docs
 # "FOUR SPACES, ONE RELIGION" -- Vardë
 indent-size = 4
 # I'll increase this by popular demand. No more than 85 though!
