@@ -1,4 +1,4 @@
-name: PyLint/Flake8/mypy
+name: Flake8 and mypy
 on:
   push:
     branches-ignore:
