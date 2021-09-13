@@ -3,9 +3,13 @@ on:
   push:
     branches-ignore:
       - autoreleases
+    tags-ignore:
+      - '*'
   pull_request:
     branches-ignore:
       - autoreleases
+    tags-ignore:
+      - '*'
 
 jobs:
   PyLint-Flake8-mypy:
