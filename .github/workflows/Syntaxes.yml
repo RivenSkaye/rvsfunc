@@ -33,9 +33,6 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install -r requirements-dev.txt --use-feature=in-tree-build
 
-      - name: Running pylint
-        run: pylint rvsfunc
-
       - name: Running flake8
         run: flake8 ./
 
