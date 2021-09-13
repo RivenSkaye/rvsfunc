@@ -1,5 +1,11 @@
 name: PyLint/Flake8/mypy
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - autoreleases
+  pull_request:
+    branches-ignore:
+      - autoreleases
 
 jobs:
   PyLint-Flake8-mypy:
@@ -24,10 +30,10 @@ jobs:
           pip install -r requirements-dev.txt --use-feature=in-tree-build
 
       - name: Running pylint
-        run: pylint vardautomation
+        run: pylint rvsfunc
 
       - name: Running flake8
-        run: flake8 vardautomation
+        run: flake8 ./
 
       - name: Running mypy
-        run: mypy -p vardautomation
+        run: mypy -p rvsfunc
