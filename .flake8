@@ -20,6 +20,8 @@ max-doc-length = 85
 hang-closing = False
 # Selecting additional Flake8 plugins
 extend-select =
+    # Fix your comprehensions
+    C4,
     # Flake8-raise warnings
     R1,
     # Flake8-return
