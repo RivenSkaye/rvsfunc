@@ -34,7 +34,7 @@ jobs:
           pip install -r requirements-dev.txt --use-feature=in-tree-build
 
       - name: Running flake8
-        run: flake8 ./
+        run: flake8 ./rvsfunc
 
       - name: Running mypy
-        run: mypy -p rvsfunc
+        run: mypy ./rvsfunc
