@@ -8,7 +8,7 @@ with open("requirements.txt") as rq:
 
 setup(
     name="rvsfunc",
-    version="0.0.4",
+    version="0.0.5",
     author="Riven Skaye",
     author_email="riven@tae.moe",
     description="VapourSynth functions written or modified by Riven Skaye",
