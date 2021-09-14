@@ -39,4 +39,8 @@ extend-select =
     TYCO1
 extend-ignore =
     TYCO2
+# Quotes plugin: I like 'em double
 inline-quotes = double
+# NOQA: Require codes
+noqa-require-code = True
+noqa-include-name = True
