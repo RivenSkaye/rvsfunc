@@ -7,12 +7,12 @@ core = vs.core
 
 def questionable_rescale(
     clip: vs.VideoNode, height: int, b: float = 1/3, c: float = 1/3,
-    descaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.descale.Debicubic, # noqa 501
+    descaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.descale.Debicubic,  # type: ignore  # noqa: E501
     scaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Spline36,
-    scale_kwargs: Dict = {'height': None}, correct_shift: bool = True,
+    scale_kwargs: Dict = {"height": None}, correct_shift: bool = True,
     apply_mask: bool = True, mask_thresh: float = 0.05,
     ext_mask: Optional[vs.VideoNode] = None, depth_out: int = -1,
-    return_mask: bool = False) -> vs.VideoNode: # noqa 125
+    return_mask: bool = False) -> vs.VideoNode:  # noqa:E125
 
     from nnedi3_rpow2 import nnedi3_rpow2 as rpow2
     """ Descale function originally written by Zastin, edited by me.
@@ -56,16 +56,16 @@ def questionable_rescale(
                        Please slice the clip into several same-res clips or \
                        descale in another way.")
     if scale_kwargs.get("width") is None:
-        scale_kwargs['width'] = clip.width
+        scale_kwargs["width"] = clip.width
     if scale_kwargs.get("height") is None:
-        scale_kwargs['height'] = clip.height
+        scale_kwargs["height"] = clip.height
     depth_out = vsutil.get_depth(clip) if depth_out < 0 else depth_out
-    if vsutil.get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:
+    if vsutil.get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:  # type: ignore  # noqa: E501
         clip = vsutil.depth(clip, 16, sample_type=vs.INTEGER)
     rgv = core.rgvs.RemoveGrain(clip, mode=1)
-    clamp = vsutil.depth(rgv, 32, dither_type='none')
-    clip = vsutil.depth(clip, 32, dither_type='none')
-    chroma = clip.format.num_planes > 1
+    clamp = vsutil.depth(rgv, 32, dither_type="none")
+    clip = vsutil.depth(clip, 32, dither_type="none")
+    chroma = clip.format.num_planes > 1  # type: ignore
 
     if chroma:
         y, u, v = vsutil.split(clip)
@@ -74,22 +74,22 @@ def questionable_rescale(
         y = clip
         cy = clamp
 
-    descy = descaler(y, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c) # noqa 501
-    desccy = descaler(cy, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c) # noqa 501
+    descy = descaler(y, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
+    desccy = descaler(cy, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
 
-    err = descy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c) # noqa 501
-    diff_a = core.std.Expr([y, err], 'x y - abs')
-    cerr = desccy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c) # noqa 501
-    diff_b = core.std.Expr([cy, cerr], 'x y - abs')
-    pre_descale = core.std.Expr([diff_a,diff_b,y,cy], f'x y - {1000/(1<<16)-1} > x {2500/(1<<16)-1} > and z a ?') # noqa 501
+    err = descy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)  # noqa: E501
+    diff_a = core.std.Expr([y, err], "x y - abs")
+    cerr = desccy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)  # noqa: E501
+    diff_b = core.std.Expr([cy, cerr], "x y - abs")
+    pre_descale = core.std.Expr([diff_a, diff_b, y, cy], f"x y - {1000/(1<<16)-1} > x {2500/(1<<16)-1} > and z a ?")  # noqa: E501
 
-    descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c) # noqa 501
+    descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
     if not scaler:
-        return descaled
+        return descaled  # type: ignore
     doubled = rpow2(descaled, correct_shift=correct_shift)
-    doubled = scaler(doubled, **scale_kwargs)
+    doubled = scaler(doubled, **scale_kwargs)  # type: ignore
     if apply_mask:
-        mask = detail_mask(y, doubled, thresh=mask_thresh) if not ext_mask else ext_mask # noqa 501
+        mask = detail_mask(y, doubled, thresh=mask_thresh) if not ext_mask else ext_mask  # noqa: E501
         if return_mask:
             return mask
         doubled = core.std.MaskedMerge(doubled, y, mask)

@@ -1,0 +1,40 @@
+name: Flake8 and mypy
+on:
+  push:
+    branches-ignore:
+      - autoreleases
+    tags-ignore:
+      - '*'
+  pull_request:
+    branches-ignore:
+      - autoreleases
+    tags-ignore:
+      - '*'
+
+jobs:
+  PyLint-Flake8-mypy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.9
+        uses: actions/setup-python@v2
+        with:
+            python-version: 3.9
+
+      - name: Install VapourSynth
+        uses: Irrational-Encoding-Wizardry/install-vapoursynth-action@v0.1
+        with:
+          version: latest
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements-dev.txt --use-feature=in-tree-build
+
+      - name: Running flake8
+        run: flake8 ./rvsfunc
+
+      - name: Running mypy
+        run: mypy ./rvsfunc

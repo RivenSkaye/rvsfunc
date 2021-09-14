@@ -1,4 +1,4 @@
-from typing import Union, Optional, Callable, Any, List
+from typing import Union, Optional, Callable, Any, List, Dict
 from .masking import detail_mask
 import vapoursynth as vs
 core = vs.core
@@ -30,19 +30,19 @@ def batch_index(paths: Union[List[str], str],
     sauces = []
     try:
         for p in paths:
-            sauces.append(source_filter(p, **src_args))
+            sauces.append(source_filter(p, **src_args))  # type: ignore
         if not show_list:
             del sauces
-    except Exception as e:
+    except Exception:
         raise
     return [] if not show_list else sauces
 
 
 def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
               endframe: int,
-              nc_filterfunc: Optional[Callable[[vs.VideoNode, Any], vs.VideoNode]] = None, # noqa 501
+              nc_filterfunc: Optional[Callable[[vs.VideoNode, Any], vs.VideoNode]] = None,  # noqa: E501
               use_internal: bool = False,
-              ext_mask: Optional[vs.VideoNode] = None, **kwargs) -> vs.VideoNode: # noqa 501
+              ext_mask: Optional[vs.VideoNode] = None, **kwargs: Dict[str, Any]) -> vs.VideoNode:  # noqa: E501
     """ Function for splicing in video from a different source.
 
     The intended purpose is to splice NCs into an episode when they look better
@@ -69,11 +69,10 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
                             the filterfunc is a ``partial``.
     """
     if nc_filterfunc:
-        nc = nc_filterfunc(nc, **kwargs)
+        nc = nc_filterfunc(nc, **kwargs)  # type: ignore
     elif use_internal:
         nc = copy_credits(source[startframe:endframe+1], nc, ext_mask)
-    out = source[:startframe] + nc + source[endframe+1:]
-    return out
+    return source[:startframe] + nc + source[endframe+1:]
 
 
 def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,

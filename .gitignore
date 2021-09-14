@@ -13,6 +13,7 @@ __pycache__/
 build/
 *egg-info/
 dist/*
+.venv/
 
 # Documentation stuff #
 docs/_build/*

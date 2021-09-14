@@ -5,15 +5,15 @@ import vapoursynth as vs
 core = vs.core
 
 
-def eoe_convolution(clip: vs.VideoNode):
+def eoe_convolution(clip: vs.VideoNode) -> vs.VideoNode:
     return clip.std.Convolution(matrix=[-1] * 4 + [8] + [-1] * 4,
                                 planes=[0, 1, 2], saturate=False)
 
 
 def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
-                  maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode] = eoe_convolution, # noqa 501
+                  maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode] = eoe_convolution,  # type: ignore  # noqa: E501
                   mask_kwargs: Dict = {},
-                  shifter: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Point # noqa 501
+                  shifter: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Point  # noqa: E501
                   ) -> vs.VideoNode:
     """ Automatically fixes chroma shifts, at the very least by approximation.
     This function takes in a clip and scales it to a 4x larger YUV444P clip.
@@ -45,6 +45,9 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
     :return: vs.VideoNode:      The input clip, but without chroma shift.
     """
     _fname = "rvsfunc chromashifter:"
+    if not clip.format:
+        raise vs.Error(f"{_fname} The clip must have a constant format. \
+                        Please convert or split the clip.")
     if clip.format.color_family is not vs.YUV:
         raise vs.Error(f"{_fname} The clip MUST be of the YUV color family. \
                        Please convert it before calling this function.")
@@ -56,7 +59,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
         frame_array = []
         for plane in range(frame.format.num_planes):
             plane_array = np.array(frame.get_read_array(plane), copy=False)
-            frame_array.append(plane_array.reshape(list(plane_array.shape) + [1])) # noqa 501
+            frame_array.append(plane_array.reshape(list(plane_array.shape) + [1]))  # noqa: E501
         return np.concatenate(frame_array, axis=2)
 
     shifted_clips: Dict[float, vs.VideoNode] = {0: clip}
@@ -75,12 +78,12 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                     row_first[row, 1] <= row_first[row, 2]
                 ):
                     shifts.append(
-                        256 / round((wthresh + 1) * (((row_first[row, 1] - luma_col) + 1) / 8)) # noqa 501
+                        256 / round((wthresh + 1) * (((row_first[row, 1] - luma_col) + 1) / 8))  # noqa: E501
                     )
                     continue
                 if array_above[row, row_first[row, 2], 2]:
                     shifts.append(
-                        256 / round((wthresh + 1) * (((row_first[row, 2] - luma_col) + 1) / 8)) # noqa 501
+                        256 / round((wthresh + 1) * (((row_first[row, 2] - luma_col) + 1) / 8))  # noqa: E501
                     )
             except ZeroDivisionError:
                 continue
@@ -93,7 +96,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
         shift = round(shift * 8) / 8
         shifted = shifted_clips.get(shift)
         if shifted is None:
-            shifted = shifter(clip, src_left=shift)
+            shifted = shifter(clip, src_left=shift)  # type: ignore
             shifted_clips.update({shift: shifted})
         return shifted
 
@@ -103,7 +106,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
                                format=vs.YUV444P8)
     if maskfunc is core.std.Prewitt:
         mask_kwargs["planes"] = [0, 1, 2]
-    yuv = maskfunc(yuv, **mask_kwargs)
+    yuv = maskfunc(yuv, **mask_kwargs)  # type: ignore
 
     out = core.std.FrameEval(clip, get_shifted, yuv)
     out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)
