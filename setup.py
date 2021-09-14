@@ -3,12 +3,15 @@ from setuptools import setup
 with open("README.md", "r") as rdm:
     long_desc = rdm.read()
 
-with open("requirements.txt") as rq:
+with open("requirements.txt", "r") as rq:
     req = rq.read()
+
+with open(".version", "r") as v:
+    ver = v.read().strip()
 
 setup(
     name="rvsfunc",
-    version="0.0.5",
+    version=ver,
     author="Riven Skaye",
     author_email="riven@tae.moe",
     description="VapourSynth functions written or modified by Riven Skaye",
