@@ -43,6 +43,6 @@ extend-ignore =
     TYCO2
 # Quotes plugin: I like 'em double
 inline-quotes = double
-# NOQA: Require codes
+# Flake8-NOQA: Require codes
 noqa-require-code = True
 noqa-include-name = True
