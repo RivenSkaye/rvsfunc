@@ -16,6 +16,7 @@ import literally_any_other_func as laof
 ```
 
 # Installation
+
 If you were one of the unlucky few to get this thing as a monolithic file,
 then delete that first.
 As for installing this, it's not yet on PyPI, so you'll have to install it using
@@ -30,6 +31,18 @@ Assuming Python 3.8+ is configured as the default, otherwise use `python3`,
 # Unix-like OSes
 $ python -m pip install rvsfunc
 ```
+
+# Requirements not on PyPI
+
+rvsfunc has a couple of dependencies that are not available on PyPI.
+I try to keep these to a minimum and as the list grows I expect it to be
+mostly VapourSynth plugins. You can usually get these through [VSRepo](https://github.com/vapoursynth/vsrepo),
+or perhaps you can find them on [VSDB](https://vsdb.top/). _When grabbing from VSDB follow the
+links to the home URL of a project as it's horribly outdated._
+The list is not exhaustive however, and doesn't list dependencies of dependencies.
+
+These will be listed in the docs provided soon&#0153;, as well as being added
+to the next release version of rvsfunc in a zip file.
 
 # Contributing
 
