@@ -12,7 +12,8 @@ extend-exclude =
     setup.cfg,
     setup.py,
     docs,
-    mypy-stubs
+    mypy-stubs,
+    *.pyi
 # "FOUR SPACES, ONE RELIGION" -- Vardë
 indent-size = 4
 # I'll increase this by popular demand. No more than 85 though!
