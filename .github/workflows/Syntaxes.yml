@@ -12,7 +12,7 @@ on:
       - '*'
 
 jobs:
-  PyLint-Flake8-mypy:
+  Flake8-MyPy:
     runs-on: ubuntu-latest
 
     steps:
