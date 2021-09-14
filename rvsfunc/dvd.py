@@ -60,7 +60,7 @@ def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
         for plane in range(frame.format.num_planes):
             plane_array = np.array(frame.get_read_array(plane), copy=False)
             frame_array.append(plane_array.reshape(list(plane_array.shape) + [1]))  # noqa: E501
-        return np.concatenate(frame_array, axis=2)  # type: ignore
+        return np.concatenate(frame_array, axis=2)
 
     shifted_clips: Dict[float, vs.VideoNode] = {0: clip}
 
