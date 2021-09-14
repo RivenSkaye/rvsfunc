@@ -7,8 +7,8 @@ core = vs.core
 
 def scradit_mask(luma: vs.VideoNode, b: float = 1/3, c: float = 1/3,
                  height: int = 720, absthresh: float = 0.060, iters: int = 4,
-                 descaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.descale.Debicubic, # noqa 501
-                 upscaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Bicubic, # noqa 501
+                 descaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.descale.Debicubic,  # noqa:E501
+                 upscaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Bicubic,  # noqa:E501
                  dekwargs: Dict = {}, upkwargs: Dict = {}) -> vs.VideoNode:
     """ Credit masking function borrowed from Scrad.
 
@@ -53,7 +53,7 @@ def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode,
     """
     sy = vsutil.get_y(source)
     ry = vsutil.get_y(rescaled)
-    sy = core.resize.Point(sy, format=ry.format.id) if not sy.format.id == ry.format.id else sy # noqa 501
+    sy = core.resize.Point(sy, format=ry.format.id) if not sy.format.id == ry.format.id else sy  # noqa:E501
     mask = core.std.Expr([sy, ry], "x y - abs").std.Binarize(thresh)
     mask = vsutil.iterate(mask, core.std.Maximum, 4)
     mask = vsutil.iterate(mask, core.std.Inflate, 4)
@@ -61,7 +61,7 @@ def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode,
 
 
 def dehalo_mask(clip: vs.VideoNode,
-                maskgen: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.std.Prewitt, # noqa 501
+                maskgen: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.std.Prewitt,  # noqa:E501
                 iter_out: int = 2, iter_in: int = -1, inner: bool = False,
                 outer: bool = False, **mask_args) -> vs.VideoNode:
     """ Lazy wrapper for making a dehalo mask.

@@ -40,9 +40,9 @@ def batch_index(paths: Union[List[str], str],
 
 def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
               endframe: int,
-              nc_filterfunc: Optional[Callable[[vs.VideoNode, Any], vs.VideoNode]] = None, # noqa 501
+              nc_filterfunc: Optional[Callable[[vs.VideoNode, Any], vs.VideoNode]] = None,  # noqa:E501
               use_internal: bool = False,
-              ext_mask: Optional[vs.VideoNode] = None, **kwargs) -> vs.VideoNode: # noqa 501
+              ext_mask: Optional[vs.VideoNode] = None, **kwargs) -> vs.VideoNode:  # noqa:E501
     """ Function for splicing in video from a different source.
 
     The intended purpose is to splice NCs into an episode when they look better
