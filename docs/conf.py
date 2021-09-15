@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath("../"))
 project = "rvsfunc"
 copyright = "2021, Riven Skaye"
 author = "Riven Skaye"
+html_favicon = "favicon.ico"
 
 # The full version, including alpha/beta/rc tags
 with open("../.version", "r") as v:
