@@ -52,19 +52,4 @@ For the full list of requirements not on pip, check [the docs](https://rvsfunc.t
 
 # Contributing
 
-If you wish to contribute by adding new things or improving existing code,
-please do make sure to install the requirements for the project.
-```bash
-$ git clone https://github.com/RivenSkaye/rvsfunc && cd rvsfunc
-$ python -m pip install -r requirements-dev.txt
-```
-If you wish to use virtualenvs or if you have another version of rvsfunc
-installed, good luck. I expect contributors to be able to solve this.
-If you'd like to install a development version so you can both
-contribute and use all the latest code, follow the previous steps with
-```bash
-$ python -m pip uninstall rvsfunc
-$ python -m pip install -e ./rvsfunc
-```
-_You will need to install it this way for development purposes, but a venv is recommended
-over using unstable code in your normal env._
+[Contributing guidelines have been moved to a dedicated file.](./CONTRIBUTING.md)
