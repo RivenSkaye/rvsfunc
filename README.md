@@ -65,7 +65,7 @@ If you'd instead like to install a development version so you can both
 contribute and use all the latest code, follow the previous steps with
 ```bash
 $ python -m pip uninstall rvsfunc
-$ python -m pip install -e rvsfunc
+$ python -m pip install -e ./rvsfunc
 ```
 
 Currently in dire need of someone willing to help me with getting the docs
