@@ -1,0 +1,9 @@
+version: 2
+sphinx:
+  configuration: docs/conf.py
+  builder: html
+
+python:
+  version: "3.8"
+  install:
+  - requirements: docs/sphinx-requirements.txt
