@@ -52,4 +52,4 @@ For the full list of requirements not on pip, check [the docs](https://rvsfunc.t
 
 # Contributing
 
-[Contributing guidelines have been moved to a dedicated file.](./CONTRIBUTING.md)
+[Contributing guidelines can be found in the relevant file.](./CONTRIBUTING.md)

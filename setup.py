@@ -1,7 +1,7 @@
 from setuptools import setup
 
 with open("README.md", "r") as rdm:
-    long_desc = rdm.read()
+    long_desc = rdm.read().replace("(./", "(https://github.com/RivenSkaye/rvsfunc/blob/master/")
 
 with open("requirements.txt", "r") as rq:
     req = rq.read()
