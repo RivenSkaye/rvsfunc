@@ -52,9 +52,9 @@ def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode,
                 thresh: float = 0.05) -> vs.VideoNode:
     """ Generates a fairly basic detail mask, mostly for descaling purposes.
 
-    This is mostly used to pick up on detail _lost_ in ``questionable_descale``
-    as per Zastin's original script. Catches most if not all elements in a
-    different native resolution
+    This is mostly used to pick up on detail *lost* in
+    :py:func:`.cursed.questionable_rescale` as per Zastin's original script.
+    Catches most if not all elements in a different native resolution
 
     :param source:      The clip to generate the mask for.
     :param rescaled:    The descaled and re-upscaled clip where detail was lost.
@@ -118,3 +118,10 @@ def fineline_mask(clip: vs.VideoNode, thresh: int = 95) -> vs.VideoNode:
     redo = int(floor(thresh/2.5)*2)
     return core.std.Expr([bin_mask, maska],
                          [f"x y < y x ? {redo} < 0 255 ?"])
+
+
+def eoe_convolution(clip: vs.VideoNode) -> vs.VideoNode:
+    """ Convolution written by EoE for :py:func:`.dvd.chromashifter`
+    """
+    return clip.std.Convolution(matrix=[-1] * 4 + [8] + [-1] * 4,
+                                planes=[0, 1, 2], saturate=False)

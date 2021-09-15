@@ -15,7 +15,7 @@ core = vs.core
 
 def batch_index(paths: Union[List[str], str],
                 source_filter: Callable[[str], Any], show_list: bool = False,
-                **src_args: Any) -> List[vs.VideoNode]:
+                **src_args: Dict[str, Any]) -> List[vs.VideoNode]:
     """ Index sources in batch, provide a list of files to index.
 
     Simple lazy function. Takes a path or a list of paths, indexes them and
@@ -88,9 +88,10 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,
                  mask: Optional[vs.VideoNode] = None) -> vs.VideoNode:
     """ Copy credits from source to the nc using a mask.
 
-    This function internally calls ``detail_mask`` which is meant for descales.
-    As such, it assumes the NC doesn't have major differences with the source
-    as they are provided. Assumes both inputs have the same length.
+    This function internally calls :py:func:`.masking.detail_mask` which is
+    meant for descales. As such, it assumes the NC doesn't have major
+    differences with the source as they are provided.
+    Assumes both inputs have the same length.
 
     :param source:      The clip to take the credits from.
     :param nc:          The NC to copy the credits into.

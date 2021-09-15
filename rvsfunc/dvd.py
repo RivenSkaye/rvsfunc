@@ -8,16 +8,12 @@ by several subcontractors. They're generally a pain in the ass and this
 module exists to alleviate some of that pain.
 """
 
+from .masking import eoe_convolution
 from typing import Callable, Dict, Any
 from math import floor
 import numpy as np
 import vapoursynth as vs
 core = vs.core
-
-
-def eoe_convolution(clip: vs.VideoNode) -> vs.VideoNode:
-    return clip.std.Convolution(matrix=[-1] * 4 + [8] + [-1] * 4,
-                                planes=[0, 1, 2], saturate=False)
 
 
 def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
