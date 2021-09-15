@@ -2,12 +2,14 @@ name: Flake8 and mypy
 on:
   push:
     branches-ignore:
-      - autoreleases
+      - workflows
+      - docs
     tags-ignore:
       - '*'
   pull_request:
     branches-ignore:
-      - autoreleases
+      - workflows
+      - docs
     tags-ignore:
       - '*'
 
