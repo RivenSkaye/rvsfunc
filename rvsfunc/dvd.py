@@ -17,11 +17,12 @@ core = vs.core
 
 
 def chromashifter(clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
-                  maskfunc: Callable[[vs.VideoNode, Any], vs.VideoNode] = eoe_convolution,  # type: ignore  # noqa: E501
+                  maskfunc: Callable[[vs.VideoNode], vs.VideoNode] = eoe_convolution,  # noqa: E501
                   mask_kwargs: Dict = {},
                   shifter: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Point  # noqa: E501
                   ) -> vs.VideoNode:
     """ Automatically fixes chroma shifts, at the very least by approximation.
+
     This function takes in a clip and scales it to a 4x larger YUV444P clip.
     It then generates edgemasks over all of the planes to be used in distance
     calculations to figure out the proper value to shift chroma with.
