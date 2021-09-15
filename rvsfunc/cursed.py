@@ -22,8 +22,7 @@ def questionable_rescale(
     ext_mask: Optional[vs.VideoNode] = None, depth_out: int = -1,
     return_mask: bool = False) -> vs.VideoNode:  # noqa:E125
 
-    from nnedi3_rpow2 import nnedi3_rpow2 as rpow2
-    """ Descale function originally written by Zastin, edited by me.
+    """ Rescale function by Zastin for Doga Kobo, edited for reusability.
 
     It's originally written for Doga Kobo material, since they have some weird
     post-processing going on, making a normal descale impossible. It applies
@@ -94,6 +93,9 @@ def questionable_rescale(
     descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
     if not scaler:
         return descaled  # type: ignore
+    # Only import it if we actually get to using it.
+    # I swear I'll replace it.
+    from nnedi3_rpow2 import nnedi3_rpow2 as rpow2
     doubled = rpow2(descaled, correct_shift=correct_shift)
     doubled = scaler(doubled, **scale_kwargs)  # type: ignore
     if apply_mask:
