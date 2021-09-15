@@ -15,8 +15,8 @@ core = vs.core
 
 def questionable_rescale(
     clip: vs.VideoNode, height: int, b: float = 1/3, c: float = 1/3,
-    descaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.descale.Debicubic,  # type: ignore  # noqa: E501
-    scaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Spline36,
+    descaler: Callable[[vs.VideoNode, int, int, Any], vs.VideoNode] = core.descale.Debicubic,  # noqa: E501
+    scaler: Optional[Callable[[vs.VideoNode, int, int], vs.VideoNode]] = core.resize.Spline36,  # noqa: E501
     scale_kwargs: Dict = {"height": None}, correct_shift: bool = True,
     apply_mask: bool = True, mask_thresh: float = 0.05,
     ext_mask: Optional[vs.VideoNode] = None, depth_out: int = -1,
@@ -92,7 +92,7 @@ def questionable_rescale(
 
     descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
     if not scaler:
-        return descaled  # type: ignore
+        return descaled
     # Only import it if we actually get to using it.
     # I swear I'll replace it.
     from nnedi3_rpow2 import nnedi3_rpow2 as rpow2

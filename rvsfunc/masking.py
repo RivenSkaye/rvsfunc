@@ -16,8 +16,8 @@ core = vs.core
 
 def scradit_mask(luma: vs.VideoNode, b: float = 1/3, c: float = 1/3,
                  height: int = 720, absthresh: float = 0.060, iters: int = 4,
-                 descaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.descale.Debicubic,  # type: ignore  # noqa: E501
-                 upscaler: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Bicubic,  # noqa: E501
+                 descaler: Callable[[vs.VideoNode, int, int, Any], vs.VideoNode] = core.descale.Debicubic,  # noqa: E501
+                 upscaler: Callable[[vs.VideoNode, int, int, Any], vs.VideoNode] = core.resize.Bicubic,  # noqa: E501
                  dekwargs: Dict = {}, upkwargs: Dict = {}) -> vs.VideoNode:
     """ Credit masking function borrowed from Scrad.
 
