@@ -10,9 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os  # noqa: E800
-# import sys  # noqa: E800
-# sys.path.insert(0, os.path.abspath("."))  # noqa: E800
+import os
+import sys
+sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
@@ -23,8 +23,8 @@ author = "Riven Skaye"
 
 # The full version, including alpha/beta/rc tags
 with open("../.version", "r") as v:
-    ver = v.read().strip()
-release = ver
+    version = v.read().strip()
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,6 +35,7 @@ release = ver
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx_autodoc_typehints",
     "sphinx.ext.napoleon"
 ]
 
@@ -52,9 +53,13 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+autosummary_generate = True
+
+autodoc_mock_imports = ["vsutil", "vapoursynth"]

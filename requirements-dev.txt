@@ -14,5 +14,7 @@ mypy>=0.910
 mypy-extensions>=0.4.3
 setuptools>=57.4.0
 sphinx>=4.1.2
+sphinx-autodoc-typehints>=1.12.0
+sphinx_rtd_theme>=1.0.0
 twine>=3.4.2
 wheel>=0.37.0

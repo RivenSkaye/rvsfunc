@@ -26,7 +26,7 @@ rvsfunc requires a couple other things to work properly:
 * `VapourSynth <https://github.com/vapoursynth/vapoursynth/releases>`_
 * `vsutil <https://pypi.org/project/vsutil/>`_
 * `numpy <https://pypi.org/project/numpy>`_
-* `VapourSynth-descale <https://github.com/Irrational-Encoding-Wizardry/vapoursynth-descale>`
+* `VapourSynth-descale <https://github.com/Irrational-Encoding-Wizardry/vapoursynth-descale>`_
 * `nnedi3_rpow2 <https://gist.github.com/4re/342624c9e1a144a696c6>`_
 
 Each of these dependencies may have their own dependencies, it is not my
@@ -48,20 +48,30 @@ Modules
 =======
 
 .. autosummary::
-   rvsfunc.utils
-   rvsfunc.masking
-   rvsfunc.dvd
    rvsfunc.cursed
+   rvsfunc.dvd
+   rvsfunc.masking
+   rvsfunc.utils
 
-rvsfunc.utils
-=============
+rvsfunc.cursed
+==============
 
 .. autosummary::
-   rvsfunc.utils.batch_index
-   rvsfunc.utils.nc_splice
-   rvsfunc.utils.copy_credits
+   rvsfunc.voodoo.questionable_rescale
 
-.. automodule:: rvsfunc.utils
+.. automodule:: rvsfunc.cursed
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+rvsfunc.dvd
+===========
+
+.. autosummary::
+   rvsfunc.dvd.eoe_convolution
+   rvsfunc.dvd.chromashifter
+
+.. automodule:: rvsfunc.dvd
    :members:
    :undoc-members:
    :show-inheritance:
@@ -80,25 +90,15 @@ rvsfunc.masking
    :undoc-members:
    :show-inheritance:
 
-rvsfunc.dvd
-===========
+rvsfunc.utils
+=============
 
 .. autosummary::
-   rvsfunc.dvd.eoe_convolution
-   rvsfunc.dvd.chromashifter
+   rvsfunc.utils.batch_index
+   rvsfunc.utils.nc_splice
+   rvsfunc.utils.copy_credits
 
-.. automodule:: rvsfunc.dvd
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-rvsfunc.voodoo
-==============
-
-.. autosummary::
-   rvsfunc.voodoo.questionable_rescale
-
-.. automodule:: rvsfunc.cursed
+.. automodule:: rvsfunc.utils
    :members:
    :undoc-members:
    :show-inheritance:
