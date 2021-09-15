@@ -1,5 +1,12 @@
 # rvsfunc
 
+[![Documentation Status](https://readthedocs.org/projects/rvsfunc/badge/?version=latest)](https://rvsfunc.tae.moe/en/latest/?badge=latest)
+[![PyPI](https://img.shields.io/pypi/v/rvsfunc?color=green&style=plastic)](https://pypi.org/project/rvsfunc)
+[![PyPI - Format](https://img.shields.io/pypi/format/rvsfunc?logo=python&style=plastic)](https://pypi.org/project/rvsfunc)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/RivenSkaye/rvsfunc/master?logo=github&logoColor=lightblue&style=plastic)
+![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/RivenSkaye/rvsfunc?logo=github&logoColor=lightblue&style=plastic)
+
+
 A collection of vapoursynth functions I wrote or changed to make life easier.
 Most of these were because I'm too lazy for my own good, or out of desperation
 and edgecases.
