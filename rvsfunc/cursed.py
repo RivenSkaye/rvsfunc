@@ -1,3 +1,11 @@
+""" Edgecase functions that were generalized for if I ever need them again.
+
+Most of these functions should not be used in the general use case. They're
+typically written for a very specific edgecase, but generalized for if I ever
+need them again. Currently only holds `questionable_rescale` which I mangled
+from someone else's code that had a very similar edgecase.
+"""
+
 from typing import Any, Dict, Callable, Optional
 from .masking import detail_mask
 import vsutil

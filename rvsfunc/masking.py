@@ -1,3 +1,12 @@
+""" Different kinds of masking functions I either wrote or "borrowed".
+
+These are generalized as much as possible, but some masking functions just
+exist for a very specific purpose.
+This is also my playground to mess with Expressions and convolutions, so
+expect some stuff to get added and removed infrequently and a fair few commits
+that state something along the lines of me complaining about broken code.
+"""
+
 import vsutil
 import vapoursynth as vs
 from typing import Any, Dict, Callable

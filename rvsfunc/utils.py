@@ -1,3 +1,12 @@
+""" Easy livin' functions, utilities that don't match a category.
+
+The functions in this module are mostly things that don't fit in with the
+other categories but aren't really worth making a new module over.
+This module will end up mostly containing things like batch utilities and
+project setup stuff. This should spawn some ease of use functions that I think
+are missing from the well known collections like ``vsutil``.
+"""
+
 from typing import Union, Optional, Callable, Any, List, Dict
 from .masking import detail_mask
 import vapoursynth as vs

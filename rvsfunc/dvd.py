@@ -1,3 +1,13 @@
+""" Functions written specifically for issues common or exclusive to DVDs.
+
+DVDs, ancient as the specs and carriers are, come with their fair share of
+typical issues. Some of the more well-known problems are things like getting
+telecined before editing, chroma shifts that change from scene to scene and
+other grievances that stem from processing the things in several steps or
+by several subcontractors. They're generally a pain in the ass and this
+module exists to alleviate some of that pain.
+"""
+
 from typing import Callable, Dict, Any
 from math import floor
 import numpy as np
