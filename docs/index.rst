@@ -56,8 +56,10 @@ Modules
 rvsfunc.cursed
 ==============
 
+Alias: ``rvsfunc.voodoo``
+
 .. autosummary::
-   rvsfunc.voodoo.questionable_rescale
+   rvsfunc.cursed.questionable_rescale
 
 .. automodule:: rvsfunc.cursed
    :members:
@@ -68,7 +70,6 @@ rvsfunc.dvd
 ===========
 
 .. autosummary::
-   rvsfunc.dvd.eoe_convolution
    rvsfunc.dvd.chromashifter
 
 .. automodule:: rvsfunc.dvd
@@ -84,6 +85,7 @@ rvsfunc.masking
    rvsfunc.masking.detail_mask
    rvsfunc.masking.dehalo_mask
    rvsfunc.masking.fineline_mask
+   rvsfunc.masking.eoe_convolution
 
 .. automodule:: rvsfunc.masking
    :members:
