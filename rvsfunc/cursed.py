@@ -43,12 +43,14 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
                         will be passed to the NNEDI3 plugin blindly.
                         Uses all of the defaults for the plugins, with the
                         exceptions of:
-                        - ``dh`` will always be true.
-                        - ``field`` is 1 for horizontal passes, the first pass,
-                        and 0 for all others. Always 0 for ``cl`` after
+
+                        * ``dh`` will always be true.
+                        * ``field`` is 1 for horizontal passes, the first pass\
+                        , and 0 for all others. Always 0 for ``cl`` after \
                         the first pass is finished.
-                        - ``dw`` when ``cl`` is set to True.
-                        - ``opt`` is set to True.
+                        * ``dw`` when ``cl`` is set to True.
+                        * ``opt`` is set to True.
+
                         *kwargs are used to update the dict after setting
                         these values and can be overwritten. Field is determined
                         when making the call to NNEDI3 and can't be overwritten*
