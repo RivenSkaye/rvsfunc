@@ -45,8 +45,8 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
                         exceptions of:
 
                         * ``dh`` will always be true.
-                        * ``field`` is 1 for horizontal passes, the first pass\
-                        , and 0 for all others. Always 0 for ``cl`` after \
+                        * ``field`` is 1 for horizontal passes, the first pass,\
+                        and 0 for all others. Always 0 for ``cl`` after \
                         the first pass is finished.
                         * ``dw`` when ``cl`` is set to True.
                         * ``opt`` is set to True.
