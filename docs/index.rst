@@ -27,7 +27,6 @@ rvsfunc requires a couple other things to work properly:
 * `vsutil <https://pypi.org/project/vsutil/>`_
 * `numpy <https://pypi.org/project/numpy>`_
 * `VapourSynth-descale <https://github.com/Irrational-Encoding-Wizardry/vapoursynth-descale>`_
-* `nnedi3_rpow2 <https://gist.github.com/4re/342624c9e1a144a696c6>`_
 
 Each of these dependencies may have their own dependencies, it is not my
 responsibility to maintain an exhaustive list. Typically any dependencies
