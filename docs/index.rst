@@ -58,6 +58,7 @@ rvsfunc.cursed
 Alias: ``rvsfunc.voodoo``
 
 .. autosummary::
+   rvsfunc.cursed.nnedi3_rpow2
    rvsfunc.cursed.questionable_rescale
 
 .. automodule:: rvsfunc.cursed
