@@ -6,20 +6,22 @@ need them again. Currently only holds `questionable_rescale` which I mangled
 from someone else's code that had a very similar edgecase.
 """
 
-from typing import Any, Dict, Callable, Optional
-from .masking import detail_mask
 import vsutil
 import vapoursynth as vs
+from .masking import detail_mask
+from typing import Any, Dict, Callable, Optional
+
+
 core = vs.core
 
 
-def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
-                 cl: bool = False,
-                 nnedi: Optional[Callable[[vs.VideoNode, int, Any], vs.VideoNode]] = None,  # noqa: E501
-                 nsize: int = 0, nns: int = 3,
-                 **kwargs: Dict[str, Any]
-                 ) -> vs.VideoNode:
-
+def nnedi3_rpow2(
+    clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
+    cl: bool = False,
+    nnedi: Optional[Callable[[vs.VideoNode, int, Any], vs.VideoNode]] = None,
+    nsize: int = 0, nns: int = 3,
+    **kwargs: Dict[str, Any]
+) -> vs.VideoNode:
     """ nnedi3_rpow2, increasing frame dimensions by powers of 2 using NNEDI3.
 
     Aims to replace the old nnedi3_rpow2 by being a resolvable dependency and
@@ -57,7 +59,7 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
     """
 
     # Check the clip format to prevent issues and bullshittery.
-    if clip.format is not None and clip.format.color_family not in [vs.GRAY, vs.YUV]:  # noqa: E501
+    if clip.format is not None and clip.format.color_family not in [vs.GRAY, vs.YUV]:
         raise vs.Error("rpow2 only takes constant format YUV clips, \
                         please fix your input and try again.")
 
@@ -68,7 +70,7 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
     # Check if the rfactor is a power of 2. The beauty of this lies in powers
     # of 2 always having exactly one bit that's 1, so a bitwise AND operation
     # will return a non-zero value for anything that isn't a power of 2.
-    if rfactor & (rfactor-1) != 0:
+    if rfactor & (rfactor - 1) != 0:
         raise vs.Error("The rfactor must be a power of 2!")
 
     # Select an NNEDI3 plugin
@@ -80,8 +82,11 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
         elif hasattr(core, "znedi3"):
             nnedi = core.znedi3.nnedi3
         else:
-            raise vs.Error("None of the usual NNEDI3 plugins was found, please \
-                            supply one with the 'nnedi' kwarg or install one.")
+            raise vs.Error(
+                "None of the usual NNEDI3 plugins was found, please \
+                supply one with the 'nnedi' kwarg or install one."
+            )
+
     # Set up the kwargs dict
     nnedi_kwargs = {
         "clip": clip,
@@ -90,11 +95,13 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
         "nns": nns,
         "opt": True
     }
+
     if cl:
         nnedi_kwargs.update(dw=True)
+
     nnedi_kwargs.update(kwargs)
-    depth_in = clip.format.bits_per_sample  # type: ignore
-    sample_in = clip.format.sample_type  # type: ignore
+    depth_in = clip.format.bits_per_sample
+    sample_in = clip.format.sample_type
 
     def _double(vid: vs.VideoNode, src_width: int,
                 nn: Callable[..., vs.VideoNode], fix: bool, opencl: bool,
@@ -102,9 +109,9 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
                 ) -> vs.VideoNode:
         doubled = nn(vid, field=0, **args)
         if fix:
-            shiftval = 0.5+(0.25 - (vid.width/(vid.width*2))) if vid.width == src_width/2 else 0.5  # noqa: E501
+            shiftval = 0.5 + (0.25 - (vid.width / (vid.width * 2))) if vid.width == src_width / 2 else 0.5
             if opencl:
-                shift_v = 0.5+(0.25 - (vid.height/(vid.height*2))) if vid.width == src_width/2 else 0.0  # noqa: E501
+                shift_v = 0.5 + (0.25 - (vid.height / (vid.height * 2))) if vid.width == src_width / 2 else 0.0
             else:
                 shift_v = 0.0
             return doubled.resize.Spline36(src_left=shiftval, src_top=shift_v)
@@ -117,24 +124,24 @@ def nnedi3_rpow2(clip: vs.VideoNode, rfactor: int = 2, shift: bool = True,
 
     for _ in range(count):
         planes = vsutil.split(clip)
-        shifted = [_double(p, clip.width, nnedi, shift, cl, nnedi_kwargs) for p in planes]  # noqa: E501
+        shifted = [_double(p, clip.width, nnedi, shift, cl, nnedi_kwargs) for p in planes]
         if not cl:  # Handle width if we're not using NNEDI3CL for it
             shifted = [s.std.Transpose() for s in shifted]
-            shifted = [_double(s, clip.width, nnedi, shift, cl, nnedi_kwargs) for s in shifted]  # noqa: E501
+            shifted = [_double(s, clip.width, nnedi, shift, cl, nnedi_kwargs) for s in shifted]
             shifted = [s.std.Transpose() for s in shifted]
         clip = vsutil.join(shifted)
     return vsutil.depth(clip, depth_in, sample_type=sample_in)
 
 
 def questionable_rescale(
-    clip: vs.VideoNode, height: int, b: float = 1/3, c: float = 1/3,
-    descaler: Callable[[vs.VideoNode, int, int, Any], vs.VideoNode] = core.descale.Debicubic,  # noqa: E501
-    scaler: Optional[Callable[[vs.VideoNode, int, int], vs.VideoNode]] = core.resize.Spline36,  # noqa: E501
+    clip: vs.VideoNode, height: int, b: float = 1 / 3, c: float = 1 / 3,
+    descaler: Callable[[vs.VideoNode, int, int, Any], vs.VideoNode] = core.descale.Debicubic,
+    scaler: Optional[Callable[[vs.VideoNode, int, int], vs.VideoNode]] = core.resize.Spline36,
     scale_kwargs: Dict = {"height": None}, correct_shift: bool = True,
     apply_mask: bool = True, mask_thresh: float = 0.05,
     ext_mask: Optional[vs.VideoNode] = None, depth_out: int = -1,
-    return_mask: bool = False) -> vs.VideoNode:  # noqa:E125
-
+    return_mask: bool = False
+) -> vs.VideoNode:
     """ Rescale function by Zastin for Doga Kobo, edited for reusability.
 
     It's originally written for Doga Kobo material, since they have some weird
@@ -172,20 +179,27 @@ def questionable_rescale(
     """
 
     if clip.width == 0 or clip.height == 0:
-        raise vs.Error("questionable_descale: var-res clips are not supported. \
-                       Please slice the clip into several same-res clips or \
-                       descale in another way.")
+        raise vs.Error(
+            "questionable_descale: var-res clips are not supported. \
+            Please slice the clip into several same-res clips or \
+            descale in another way."
+        )
+
     if scale_kwargs.get("width") is None:
         scale_kwargs["width"] = clip.width
+
     if scale_kwargs.get("height") is None:
         scale_kwargs["height"] = clip.height
+
     depth_out = vsutil.get_depth(clip) if depth_out < 0 else depth_out
-    if vsutil.get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:  # type: ignore  # noqa: E501
+
+    if vsutil.get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:
         clip = vsutil.depth(clip, 16, sample_type=vs.INTEGER)
+
     rgv = core.rgvs.RemoveGrain(clip, mode=1)
     clamp = vsutil.depth(rgv, 32, dither_type="none")
     clip = vsutil.depth(clip, 32, dither_type="none")
-    chroma = clip.format.num_planes > 1  # type: ignore
+    chroma = clip.format.num_planes > 1
 
     if chroma:
         y, u, v = vsutil.split(clip)
@@ -194,25 +208,30 @@ def questionable_rescale(
         y = clip
         cy = clamp
 
-    descy = descaler(y, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
-    desccy = descaler(cy, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
+    descy = descaler(y, width=vsutil.get_w(height, clip.width / clip.height), height=height, b=b, c=c)
+    desccy = descaler(cy, width=vsutil.get_w(height, clip.width / clip.height), height=height, b=b, c=c)
 
-    err = descy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)  # noqa: E501
+    err = descy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)
     diff_a = core.std.Expr([y, err], "x y - abs")
-    cerr = desccy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)  # noqa: E501
+    cerr = desccy.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)
     diff_b = core.std.Expr([cy, cerr], "x y - abs")
-    pre_descale = core.std.Expr([diff_a, diff_b, y, cy], f"x y - {1000/(1<<16)-1} > x {2500/(1<<16)-1} > and z a ?")  # noqa: E501
+    pre_descale = core.std.Expr([diff_a, diff_b, y, cy], f"x y - {1000/(1<<16)-1} > x {2500/(1<<16)-1} > and z a ?")
 
-    descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width/clip.height), height=height, b=b, c=c)  # type: ignore  # noqa: E501
+    descaled = descaler(pre_descale, width=vsutil.get_w(height, clip.width / clip.height), height=height, b=b, c=c)
+
     if not scaler:
         return descaled
+
     doubled = nnedi3_rpow2(descaled, shift=correct_shift, cl=True)
-    doubled = scaler(doubled, **scale_kwargs)  # type: ignore
+    doubled = scaler(doubled, **scale_kwargs)
+
     if apply_mask:
-        mask = detail_mask(y, doubled, thresh=mask_thresh) if not ext_mask else ext_mask  # noqa: E501
+        mask = detail_mask(y, doubled, thresh=mask_thresh) if not ext_mask else ext_mask
         if return_mask:
             return mask
         doubled = core.std.MaskedMerge(doubled, y, mask)
+
     if chroma:
         doubled = vsutil.join([doubled, u, v])
+
     return vsutil.depth(doubled, depth_out)
