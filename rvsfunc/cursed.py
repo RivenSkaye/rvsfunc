@@ -1,5 +1,4 @@
 """ Edgecase functions that were generalized for if I ever need them again.
-
 Most of these functions should not be used in the general use case. They're
 typically written for a very specific edgecase, but generalized for if I ever
 need them again. Currently only holds `questionable_rescale` which I mangled
@@ -23,13 +22,11 @@ def nnedi3_rpow2(
     **kwargs: Dict[str, Any]
 ) -> vs.VideoNode:
     """ nnedi3_rpow2, increasing frame dimensions by powers of 2 using NNEDI3.
-
     Aims to replace the old nnedi3_rpow2 by being a resolvable dependency and
     not providing most of the standard NNEDI args due to them remaining default.
     Lists non-default arguments and adds an optional argument to enable use
     of OpenCL.
     Uses ``core.resize.Spline36`` for chroma shift correction, if applicable.
-
     :param clip:        YUV input clip. You'll get the same depth back.
     :param rfactor:     The factor with which to increase the size, must be
                         a power of 2 or an error will be raised.
@@ -45,14 +42,12 @@ def nnedi3_rpow2(
                         will be passed to the NNEDI3 plugin blindly.
                         Uses all of the defaults for the plugins, with the
                         exceptions of:
-
                         * ``dh`` will always be true.
                         * ``field`` is 1 for horizontal passes, the first pass,\
                         and 0 for all others. Always 0 for ``cl`` after \
                         the first pass is finished.
                         * ``dw`` when ``cl`` is set to True.
                         * ``opt`` is set to True.
-
                         *kwargs are used to update the dict after setting
                         these values and can be overwritten. Field is determined
                         when making the call to NNEDI3 and can't be overwritten*
@@ -60,8 +55,9 @@ def nnedi3_rpow2(
 
     # Check the clip format to prevent issues and bullshittery.
     if clip.format is not None and clip.format.color_family not in [vs.GRAY, vs.YUV]:
-        raise vs.Error("rpow2 only takes constant format YUV clips, \
-                        please fix your input and try again.")
+        raise vs.Error(
+            "rpow2 only takes constant format YUV clips, please fix your input and try again."
+        )
 
     # Check if the rfactor is within the legal ranges
     if rfactor < 2 or rfactor > 1024:
@@ -143,12 +139,10 @@ def questionable_rescale(
     return_mask: bool = False
 ) -> vs.VideoNode:
     """ Rescale function by Zastin for Doga Kobo, edited for reusability.
-
     It's originally written for Doga Kobo material, since they have some weird
     post-processing going on, making a normal descale impossible. It applies
     some Expression magic for fixing some common Doga Kobo issues.
     USE AT YOUR OWN RISK.
-
     :param clip:            YUV input clip, integer format. Will be dithered
                             down if required.
     :param height:          The height to descale to.
