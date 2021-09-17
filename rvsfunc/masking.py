@@ -15,12 +15,14 @@ from vsutil import get_w, depth, get_y, iterate
 
 core = vs.core
 
+_Scaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
+
 
 def scradit_mask(
     luma: vs.VideoNode, b: float = 1 / 3, c: float = 1 / 3,
     height: int = 720, absthresh: float = 0.060, iters: int = 4,
-    descaler: Callable[[vs.VideoNode, int, int, Any], vs.VideoNode] = core.descale.Debicubic,
-    upscaler: Callable[[vs.VideoNode, int, int, Any], vs.VideoNode] = core.resize.Bicubic,
+    descaler: _Scaler = core.descale.Debicubic,
+    upscaler: _Scaler = core.resize.Bicubic,
     dekwargs: Dict = {}, upkwargs: Dict = {}
 ) -> vs.VideoNode:
     """
@@ -59,7 +61,9 @@ def scradit_mask(
     return mask
 
 
-def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float = 0.05) -> vs.VideoNode:
+def detail_mask(
+  source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float = 0.05
+) -> vs.VideoNode:
     """
     Generates a fairly basic detail mask, mostly for descaling purposes.
     This is mostly used to pick up on detail *lost* in
@@ -72,7 +76,8 @@ def detail_mask(source: vs.VideoNode, rescaled: vs.VideoNode, thresh: float = 0.
 
     sy, ry = get_y(source), get_y(rescaled)
 
-    sy = core.resize.Point(sy, format=ry.format.id) if not sy.format.id == ry.format.id else sy
+    if not sy.format.id == ry.format.id:
+        sy = core.resize.Point(sy, format=ry.format.id)
 
     mask = core.std.Expr([sy, ry], "x y - abs").std.Binarize(thresh)
 
@@ -145,5 +150,6 @@ def fineline_mask(clip: vs.VideoNode, thresh: int = 95) -> vs.VideoNode:
 
 def eoe_convolution(clip: vs.VideoNode) -> vs.VideoNode:
     """ Convolution written by EoE for :py:func:`.dvd.chromashifter`"""
+    matrix = [-1] * 4 + [8] + [-1] * 4
 
-    return clip.std.Convolution(matrix=[-1] * 4 + [8] + [-1] * 4, planes=[0, 1, 2], saturate=False)
+    return clip.std.Convolution(matrix, planes=[0, 1, 2], saturate=False)
