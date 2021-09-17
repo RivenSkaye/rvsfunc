@@ -6,6 +6,7 @@ from someone else's code that had a very similar edgecase.
 """
 
 import vsutil
+from math import log
 import vapoursynth as vs
 from .masking import detail_mask
 from typing import Any, Dict, Callable, Optional
@@ -60,13 +61,10 @@ def nnedi3_rpow2(
         )
 
     # Check if the rfactor is within the legal ranges
-    if rfactor < 2 or rfactor > 1024:
+    if 2 < rfactor <= 1024:
         raise vs.Error("The rfactor parameter must be between 2 and 1024")
 
-    # Check if the rfactor is a power of 2. The beauty of this lies in powers
-    # of 2 always having exactly one bit that's 1, so a bitwise AND operation
-    # will return a non-zero value for anything that isn't a power of 2.
-    if rfactor & (rfactor - 1) != 0:
+    if not log(rfactor, 2).is_integer():
         raise vs.Error("The rfactor must be a power of 2!")
 
     # Select an NNEDI3 plugin
@@ -89,20 +87,19 @@ def nnedi3_rpow2(
         "dh": True,
         "nsize": nsize,
         "nns": nns,
-        "opt": True
+        "opt": True,
+        "dw": cl
     }
-
-    if cl:
-        nnedi_kwargs.update(dw=True)
 
     nnedi_kwargs.update(kwargs)
     depth_in = clip.format.bits_per_sample
     sample_in = clip.format.sample_type
 
-    def _double(vid: vs.VideoNode, src_width: int,
-                nn: Callable[..., vs.VideoNode], fix: bool, opencl: bool,
-                args: Dict
-                ) -> vs.VideoNode:
+    def _double(
+        vid: vs.VideoNode, src_width: int,
+        nn: Callable[..., vs.VideoNode], fix: bool, opencl: bool,
+        args: Dict
+    ) -> vs.VideoNode:
         doubled = nn(vid, field=0, **args)
         if fix:
             shiftval = 0.5 + (0.25 - (vid.width / (vid.width * 2))) if vid.width == src_width / 2 else 0.5
@@ -114,9 +111,7 @@ def nnedi3_rpow2(
         return doubled
 
     # Calulate how many times we have to run this thing
-    count = 0
-    while 2**count < rfactor:
-        count += 1
+    count = log(rfactor, 2)
 
     for _ in range(count):
         planes = vsutil.split(clip)
