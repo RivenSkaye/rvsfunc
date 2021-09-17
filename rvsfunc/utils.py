@@ -51,7 +51,7 @@ def batch_index(
 
     try:
         for p in paths:
-            sauces.append(source_filter(p, **src_args))  # type: ignore
+            sauces.append(source_filter(p, **src_args))
         if not show_list:
             del sauces
     except Exception:
@@ -95,7 +95,7 @@ def nc_splice(
     """
 
     if nc_filterfunc:
-        nc = nc_filterfunc(nc, **kwargs)  # type: ignore
+        nc = nc_filterfunc(nc, **kwargs)
     elif use_internal:
         nc = copy_credits(source[startframe:endframe + 1], nc, ext_mask)
 
