@@ -106,7 +106,7 @@ def nnedi3_rpow2(
         doubled = nn(vid, field=0, **args)
 
         if not fix:
-          return doubled
+            return doubled
 
         shift_v, shift_h = 0.0, 0.5
 
@@ -125,13 +125,15 @@ def nnedi3_rpow2(
         planes = split(clip)
 
         shifted = [
-          _double(p, clip.width, nnedi, shift, cl, nnedi_kwargs) for p in planes
+            _double(p, clip.width, nnedi, shift, cl, nnedi_kwargs) for p in planes
         ]
 
         if not cl:  # Handle width if we're not using NNEDI3CL for it
             shifted = [s.std.Transpose() for s in shifted]
             shifted = [
-              _double(s, clip.width, nnedi, shift, cl, nnedi_kwargs) for s in shifted
+                _double(
+                    s, clip.width, nnedi, shift, cl, nnedi_kwargs
+                ) for s in shifted
             ]
             shifted = [s.std.Transpose() for s in shifted]
 
@@ -221,27 +223,27 @@ def questionable_rescale(
     desccy = descaler(cy, get_w(height, clip.width / clip.height), height, b, c)
 
     def _get_err_diff(y: vs.VideoNode) -> vs.VideoNode:
-      err = y.resize.Bicubic(y.width, y.height, filter_param_a=b, filter_param_b=c)
-      return core.std.Expr([y, err], "x y - abs")
+        err = y.resize.Bicubic(y.width, y.height, filter_param_a=b, filter_param_b=c)
+        return core.std.Expr([y, err], "x y - abs")
 
     diff_a, diff_b = _get_err_diff(descy), _get_err_diff(desccy)
 
     peak = (1 << 16) - 1
 
     pre_descale = core.std.Expr(
-      [diff_a, diff_b, y, cy],
-      f"x y - {1000 / peak} > x {2500 / peak} > and z a ?"
+        [diff_a, diff_b, y, cy],
+        f"x y - {1000 / peak} > x {2500 / peak} > and z a ?"
     )
 
     descaled = descaler(
-      pre_descale, get_w(height, clip.width / clip.height), height, b, c
+        pre_descale, get_w(height, clip.width / clip.height), height, b, c
     )
 
     if not scaler:
         return descaled
 
     doubled = scaler(
-      nnedi3_rpow2(descaled, shift=correct_shift, cl=True), **scale_kwargs
+        nnedi3_rpow2(descaled, shift=correct_shift, cl=True), **scale_kwargs
     )
 
     if apply_mask:
