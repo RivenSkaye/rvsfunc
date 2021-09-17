@@ -89,20 +89,21 @@ def chromashifter(
         row_first = np.argmax(array_above, axis=1)
         shifts = []
         for row, luma_col in enumerate(row_first[:, 0]):
+            def _calc_shift(val: int) -> float:
+                return 256 / round((wthresh + 1) * (((first - luma_col) + 1) / 8))
+
             if not array_above[row, luma_col, 0]:
                 continue
             try:  # some edgecase frames produce 0 divisions
+                first, second = row_first[row, 1], row_first[row, 2]
+
                 if (
-                    array_above[row, row_first[row, 1], 1] and row_first[row, 1] <= row_first[row, 2]
+                    array_above[row, first, 1] and first <= second
                 ):
-                    shifts.append(
-                        256 / round((wthresh + 1) * (((row_first[row, 1] - luma_col) + 1) / 8))
-                    )
+                    shifts.append(_calc_shift(first))
                     continue
-                if array_above[row, row_first[row, 2], 2]:
-                    shifts.append(
-                        256 / round((wthresh + 1) * (((row_first[row, 2] - luma_col) + 1) / 8))
-                    )
+                if array_above[row, second, 2]:
+                    shifts.append(_calc_shift(second))
             except ZeroDivisionError:
                 continue
 
@@ -125,7 +126,9 @@ def chromashifter(
     if vertical:
         clip = core.std.Transpose(clip)
 
-    yuv = clip.resize.Spline36(height=clip.height * 4, width=clip.width * 4, format=vs.YUV444P8)
+    yuv = clip.resize.Spline36(
+        height=clip.height * 4, width=clip.width * 4, format=vs.YUV444P8
+    )
 
     if maskfunc is core.std.Prewitt:
         mask_kwargs["planes"] = [0, 1, 2]
