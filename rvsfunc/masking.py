@@ -101,6 +101,9 @@ def dehalo_mask(
     :param mask_args:   Expanded as ``**kwargs`` for ``mask_gen``
     """
     
+    if not clip.format:
+        raise ValueError("detail_mask: 'Variable-format clips not supported'")
+    
     maskgen = maskgen if maskgen else lambda c: core.std.Prewitt(c, [0])
     
     if clip.format.num_planes > 1:
