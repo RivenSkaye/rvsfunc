@@ -1,3 +1,4 @@
+VapourSynth>=51
 vsutil>=0.5.0
 numpy>=1.21.1
 flake8>=3.9.2
