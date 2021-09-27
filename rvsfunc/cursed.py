@@ -6,14 +6,17 @@ need them again. Currently only holds `questionable_rescale` which I mangled
 from someone else's code that had a very similar edgecase.
 """
 
-from math import log
 import vapoursynth as vs
 from .masking import detail_mask
 from typing import Any, Dict, Callable, Optional
-from vsutil import depth, split, join, get_depth, get_w, get_y
+from vsutil import depth, get_depth, get_w, get_y
 
 
 core = vs.core
+
+
+def nnedi3_rpow2(clip: vs.VideoNode, **kwargs) -> vs.VideoNode:
+    return clip
 
 
 _Descaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
@@ -29,7 +32,8 @@ def questionable_rescale(
     ext_mask: Optional[vs.VideoNode] = None, depth_out: int = -1,
     return_mask: bool = False
 ) -> vs.VideoNode:
-    """ Rescale function by Zastin for Doga Kobo, edited for reusability.
+    """
+    Rescale function by Zastin for Doga Kobo, edited for reusability.
     It's originally written for Doga Kobo material, since they have some weird
     post-processing going on, making a normal descale impossible. It applies
     some Expression magic for fixing some common Doga Kobo issues.
@@ -122,9 +126,9 @@ def questionable_rescale(
 
     if apply_mask:
         if not ext_mask:
-          mask = detail_mask(y, doubled, thresh=mask_thresh)
+            mask = detail_mask(y, doubled, thresh=mask_thresh)
         else:
-          mask = depth(ext_mask, get_depth(doubled))
+            mask = depth(ext_mask, get_depth(doubled))
         if return_mask:
             return mask
         doubled = core.std.MaskedMerge(doubled, y, mask)
