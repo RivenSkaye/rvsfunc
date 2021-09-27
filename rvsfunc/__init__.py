@@ -1,4 +1,5 @@
-""" A collection of VapourSynth stuff I wrote or mangled to make life easier.
+"""
+A collection of VapourSynth stuff I wrote or mangled to make life easier.
 
 Most of these were because I'm too lazy for my own good, some out of
 desperation and edgecases.

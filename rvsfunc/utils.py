@@ -1,4 +1,5 @@
-""" Easy livin' functions, utilities that don't match a category.
+"""
+Easy livin' functions, utilities that don't match a category.
 
 The functions in this module are mostly things that don't fit in with the
 other categories but aren't really worth making a new module over.
@@ -7,16 +8,23 @@ project setup stuff. This should spawn some ease of use functions that I think
 are missing from the well known collections like ``vsutil``.
 """
 
-from typing import Union, Optional, Callable, Any, List, Dict
-from .masking import detail_mask
+import numpy as np
 import vapoursynth as vs
+from .masking import detail_mask
+from typing import Union, Optional, Callable, Any, List, Dict
+
+
 core = vs.core
+vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore
 
 
-def batch_index(paths: Union[List[str], str],
-                source_filter: Callable[[str], Any], show_list: bool = False,
-                **src_args: Dict[str, Any]) -> List[vs.VideoNode]:
-    """ Index sources in batch, provide a list of files to index.
+def batch_index(
+    paths: Union[List[str], str],
+    source_filter: Callable[..., vs.VideoNode], show_list: bool = False,
+    **src_args: Dict[str, Any]
+) -> List[vs.VideoNode]:
+    """
+    Index sources in batch, provide a list of files to index.
 
     Simple lazy function. Takes a path or a list of paths, indexes them and
     then frees the memory before returning on success. If you happen to get any
@@ -34,25 +42,35 @@ def batch_index(paths: Union[List[str], str],
     :param src_args:        Any additional keyword args will be forwarded to
                             to the source filter as provided.
     """
-    src_args = {} if not src_args else src_args
-    paths = [paths] if isinstance(paths, str) else paths
+
+    if not src_args:
+        src_args = {}
+
+    if isinstance(paths, str):
+        paths = [paths]
+
     sauces = []
+
     try:
         for p in paths:
-            sauces.append(source_filter(p, **src_args))  # type: ignore
+            sauces.append(source_filter(p, **src_args))
         if not show_list:
             del sauces
     except Exception:
         raise
+
     return [] if not show_list else sauces
 
 
-def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
-              endframe: int,
-              nc_filterfunc: Optional[Callable[[vs.VideoNode, Any], vs.VideoNode]] = None,  # noqa: E501
-              use_internal: bool = False,
-              ext_mask: Optional[vs.VideoNode] = None, **kwargs: Dict[str, Any]) -> vs.VideoNode:  # noqa: E501
-    """ Function for splicing in video from a different source.
+def nc_splice(
+    source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
+    endframe: int,
+    nc_filterfunc: Optional[Callable[[vs.VideoNode, Any], vs.VideoNode]] = None,
+    use_internal: bool = False, ext_mask: Optional[vs.VideoNode] = None,
+    **kwargs: Dict[str, Any]
+) -> vs.VideoNode:
+    """
+    Function for splicing in video from a different source.
 
     The intended purpose is to splice NCs into an episode when they look better
     or when they're easier to filter. Allows for copying over the credits.
@@ -77,16 +95,21 @@ def nc_splice(source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
                             keyword arguments to pass to it, not required if
                             the filterfunc is a ``partial``.
     """
+
     if nc_filterfunc:
         nc = nc_filterfunc(nc, **kwargs)  # type: ignore
     elif use_internal:
-        nc = copy_credits(source[startframe:endframe+1], nc, ext_mask)
-    return source[:startframe] + nc + source[endframe+1:]
+        nc = copy_credits(source[startframe:endframe + 1], nc, ext_mask)
+
+    return source[:startframe] + nc + source[endframe + 1:]
 
 
-def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,
-                 mask: Optional[vs.VideoNode] = None) -> vs.VideoNode:
-    """ Copy credits from source to the nc using a mask.
+def copy_credits(
+    source: vs.VideoNode, nc: vs.VideoNode,
+    mask: Optional[vs.VideoNode] = None
+) -> vs.VideoNode:
+    """
+    Copy credits from source to the nc using a mask.
 
     This function internally calls :py:func:`.masking.detail_mask` which is
     meant for descales. As such, it assumes the NC doesn't have major
@@ -97,5 +120,13 @@ def copy_credits(source: vs.VideoNode, nc: vs.VideoNode,
     :param nc:          The NC to copy the credits into.
     :param mask:        Optional, an external mask to use.
     """
+
     mask = detail_mask(source, nc) if not mask else mask
+
     return core.std.MaskedMerge(nc, source, mask)
+
+
+def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
+    return np.dstack([
+        f.get_read_array(p) for p in range(f.format.num_planes)
+    ] if vs_api_below4 else f)
