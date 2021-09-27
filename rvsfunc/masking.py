@@ -58,7 +58,7 @@ def scradit_mask(
 
     mask = iterate(mask, core.std.Inflate, iters)
 
-    return mask
+    return mask  # noqa: R504
 
 
 def detail_mask(
@@ -85,7 +85,7 @@ def detail_mask(
 
     mask = iterate(mask, core.std.Inflate, 4)
 
-    return mask
+    return mask  # noqa: R504
 
 
 def dehalo_mask(
