@@ -8,12 +8,14 @@ project setup stuff. This should spawn some ease of use functions that I think
 are missing from the well known collections like ``vsutil``.
 """
 
+import numpy as np
 import vapoursynth as vs
 from .masking import detail_mask
 from typing import Union, Optional, Callable, Any, List, Dict
 
 
 core = vs.core
+vs_api_below4 = vs.__api_version__.api_major < 4
 
 
 def batch_index(
@@ -122,3 +124,11 @@ def copy_credits(
     mask = detail_mask(source, nc) if not mask else mask
 
     return core.std.MaskedMerge(nc, source, mask)
+
+
+def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
+    return np.stack([
+        np.asarray(
+            f.get_read_array(plane) if vs_api_below4 else f[plane]
+        ) for plane in np.arange(f.format.num_planes)
+    ], -1)

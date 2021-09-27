@@ -11,19 +11,12 @@ module exists to alleviate some of that pain.
 import numpy as np
 from math import floor
 import vapoursynth as vs
+from .utils import frame_to_array
 from .masking import eoe_convolution
 from typing import Callable, Dict, Any
 
 
 core = vs.core
-
-
-def frame_to_array(frame: vs.VideoFrame) -> np.ndarray:
-    frame_array = []
-    for plane in range(frame.format.num_planes):
-        plane_array = np.array(frame.get_read_array(plane), copy=False)
-        frame_array.append(plane_array.reshape(list(plane_array.shape) + [1]))
-    return np.concatenate(frame_array, axis=2)
 
 
 def chromashifter(
