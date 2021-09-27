@@ -75,7 +75,10 @@ def detail_mask(
 
     sy, ry = get_y(source), get_y(rescaled)
 
-    if not sy.format.id == ry.format.id:
+    if not (sy.format and ry.format):
+        raise ValueError("detail_mask: 'Variable-format clips not supported'")
+
+    if sy.format.id != ry.format.id:
         sy = core.resize.Point(sy, format=ry.format.id)
 
     mask = core.std.Expr([sy, ry], "x y - abs").std.Binarize(thresh)
@@ -89,7 +92,7 @@ def detail_mask(
 
 def dehalo_mask(
     clip: vs.VideoNode,
-    maskgen: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.std.Prewitt,
+    maskgen: Callable[[vs.VideoNode, Dict[str, Any]], vs.VideoNode] = core.std.Prewitt,
     iter_out: int = 2, iter_in: int = -1, inner: bool = False,
     outer: bool = False, **mask_args: Dict[str, Any]
 ) -> vs.VideoNode:
