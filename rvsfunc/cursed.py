@@ -69,6 +69,9 @@ def questionable_rescale(
             Please slice the clip into several same-res clips or \
             descale in another way."
         )
+    
+    if not clip.format:
+        raise ValueError("questionable rescale: no variable format clips!")
 
     if scale_kwargs.get("width") is None:
         scale_kwargs["width"] = clip.width
@@ -93,8 +96,10 @@ def questionable_rescale(
     else:
         y, cy = clip, clamp
 
-    descy = descaler(y, get_w(height, clip.width / clip.height), height, b, c)
-    desccy = descaler(cy, get_w(height, clip.width / clip.height), height, b, c)
+    descy = descaler(y, get_w(height, clip.width / clip.height),
+                     height, b, c)  # type: ignore
+    desccy = descaler(cy, get_w(height, clip.width / clip.height),
+                      height, b, c)  # type: ignore
 
     def _get_err_diff(y: vs.VideoNode) -> vs.VideoNode:
         err = y.resize.Bicubic(y.width, y.height, filter_param_a=b, filter_param_b=c)
@@ -109,16 +114,16 @@ def questionable_rescale(
         f"x y - {1000 / peak} > x {2500 / peak} > and z a ?"
     )
 
-    descaled = descaler(
-        pre_descale, get_w(height, clip.width / clip.height), height, b, c
-    )
+    descaled = descaler(pre_descale,
+                        get_w(height, clip.width / clip.height),
+                        height, b, c)  # type: ignore
 
     if not scaler:
         return descaled
 
     doubled = scaler(
         nnedi3_rpow2(descaled, shift=correct_shift, cl=True), **scale_kwargs
-    )
+    )  # type: ignore
 
     if apply_mask:
         if not ext_mask:
