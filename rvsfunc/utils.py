@@ -12,7 +12,6 @@ import numpy as np
 import vapoursynth as vs
 from .masking import detail_mask
 from typing import Union, Optional, Callable, Any, List, Dict
-from pathlib import Path
 
 
 core = vs.core
