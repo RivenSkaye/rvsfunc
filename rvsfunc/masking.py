@@ -101,7 +101,7 @@ def dehalo_mask(
     :param mask_args:   Expanded as ``**kwargs`` for ``mask_gen``
     """
     
-    maskgen = maskgen if maskgen else lambda c: core.std.Prewitt(c, 0)
+    maskgen = maskgen if maskgen else lambda c: core.std.Prewitt(c, [0])
 
     mask = maskgen(clip)
 
