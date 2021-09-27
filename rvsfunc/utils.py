@@ -128,7 +128,6 @@ def copy_credits(
 
 def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
     return np.stack([
-        np.asarray(
-            f.get_read_array(plane) if vs_api_below4 else f[plane]
-        ) for plane in range(f.format.num_planes)
-    ], -1)
+        np.asarray(f.get_read_array(plane))
+        for plane in range(f.format.num_planes)
+    ], -1) if vs_api_below4 else np.dstack(f)
