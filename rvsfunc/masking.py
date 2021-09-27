@@ -102,6 +102,9 @@ def dehalo_mask(
     """
     
     maskgen = maskgen if maskgen else lambda c: core.std.Prewitt(c, [0])
+    
+    if clip.format.num_planes > 1:
+        clip = get_y(clip)
 
     mask = maskgen(clip)
 
