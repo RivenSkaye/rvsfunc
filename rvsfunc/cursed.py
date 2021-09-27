@@ -6,11 +6,11 @@ need them again. Currently only holds `questionable_rescale` which I mangled
 from someone else's code that had a very similar edgecase.
 """
 
-from math import log
 import vapoursynth as vs
 from .masking import detail_mask
 from typing import Any, Dict, Callable, Optional
-from vsutil import depth, split, join, get_depth, get_w, get_y
+from vsutil import depth, get_depth, get_w, get_y
+from nnedi3_rpow2 import nnedi3_rpow2
 
 
 core = vs.core
@@ -122,9 +122,9 @@ def questionable_rescale(
 
     if apply_mask:
         if not ext_mask:
-          mask = detail_mask(y, doubled, thresh=mask_thresh)
+            mask = detail_mask(y, doubled, thresh=mask_thresh)
         else:
-          mask = depth(ext_mask, get_depth(doubled))
+            mask = depth(ext_mask, get_depth(doubled))
         if return_mask:
             return mask
         doubled = core.std.MaskedMerge(doubled, y, mask)
