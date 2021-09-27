@@ -90,9 +90,11 @@ def nnedi3_rpow2(
         "dh": True,
         "nsize": nsize,
         "nns": nns,
-        "opt": True,
-        "dw": cl
+        "opt": True
     }
+
+    if cl:
+        nnedi_kwargs |= {"dw": True}
 
     nnedi_kwargs.update(kwargs)
     depth_in = clip.format.bits_per_sample
