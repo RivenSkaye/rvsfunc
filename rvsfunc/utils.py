@@ -12,6 +12,7 @@ import numpy as np
 import vapoursynth as vs
 from .masking import detail_mask
 from typing import Union, Optional, Callable, Any, List, Dict
+from pathlib import Path
 
 
 core = vs.core
@@ -20,7 +21,7 @@ vs_api_below4 = vs.__api_version__.api_major < 4
 
 def batch_index(
     paths: Union[List[str], str],
-    source_filter: Callable[[str], Any], show_list: bool = False,
+    source_filter: Callable[[...], vs.VideoNode], show_list: bool = False,
     **src_args: Dict[str, Any]
 ) -> List[vs.VideoNode]:
     """
@@ -53,7 +54,7 @@ def batch_index(
 
     try:
         for p in paths:
-            sauces.append(source_filter(p, **src_args))
+            sauces.append(source_filter(p, **src_args))  # type: ignore
         if not show_list:
             del sauces
     except Exception:
