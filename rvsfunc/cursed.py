@@ -69,7 +69,7 @@ def questionable_rescale(
             Please slice the clip into several same-res clips or \
             descale in another way."
         )
-    
+
     if not clip.format:
         raise ValueError("questionable rescale: no variable format clips!")
 
