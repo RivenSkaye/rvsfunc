@@ -15,8 +15,8 @@ from nnedi3_rpow2 import nnedi3_rpow2
 
 core = vs.core
 
-_Descaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
-_Scaler = Callable[[vs.VideoNode, int, int], vs.VideoNode]
+_Descaler = Callable[[vs.VideoNode, int, int, Any, Any, Any], vs.VideoNode]
+_Scaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
 
 
 def questionable_rescale(

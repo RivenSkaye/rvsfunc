@@ -10,18 +10,17 @@ that state something along the lines of me complaining about broken code.
 from math import floor
 import vapoursynth as vs
 from typing import Any, Dict, Callable
+from .cursed import _Descaler, _Scaler
 from vsutil import get_w, depth, get_y, iterate
 
 
 core = vs.core
 
-_Scaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
-
 
 def scradit_mask(
     luma: vs.VideoNode, b: float = 1 / 3, c: float = 1 / 3,
     height: int = 720, absthresh: float = 0.060, iters: int = 4,
-    descaler: _Scaler = core.descale.Debicubic,
+    descaler: _Descaler = core.descale.Debicubic,
     upscaler: _Scaler = core.resize.Bicubic,
     dekwargs: Dict = {}, upkwargs: Dict = {}
 ) -> vs.VideoNode:
