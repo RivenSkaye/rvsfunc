@@ -10,14 +10,10 @@ import vapoursynth as vs
 from .masking import detail_mask
 from typing import Any, Dict, Callable, Optional
 from vsutil import depth, get_depth, get_w, get_y
+from nnedi3_rpow2 import nnedi3_rpow2
 
 
 core = vs.core
-
-
-def nnedi3_rpow2(clip: vs.VideoNode, **kwargs) -> vs.VideoNode:
-    return clip
-
 
 _Descaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
 _Scaler = Callable[[vs.VideoNode, int, int], vs.VideoNode]
