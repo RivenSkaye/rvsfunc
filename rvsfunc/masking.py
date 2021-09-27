@@ -81,7 +81,7 @@ def detail_mask(
 
 def dehalo_mask(
     clip: vs.VideoNode,
-    maskgen: Callable[[vs.VideoNode, Dict[str, Any]], vs.VideoNode] = core.std.Prewitt,  # noqa: E501
+    maskgen: Optional[Callable[[vs.VideoNode], vs.VideoNode]] = None,
     iter_out: int = 2, iter_in: int = -1, inner: bool = False,
     outer: bool = False, **mask_args: Dict[str, Any]
 ) -> vs.VideoNode:
@@ -100,8 +100,10 @@ def dehalo_mask(
     :param outer:       Returns the outer mask for checking.
     :param mask_args:   Expanded as ``**kwargs`` for ``mask_gen``
     """
+    
+    maskgen = maskgen if maskgen else lambda c: core.std.Prewitt(c, 0)
 
-    mask = maskgen(clip, **mask_args) if mask_args else maskgen(clip, 0)
+    mask = maskgen(clip)
 
     luma = core.std.ShufflePlanes(mask, 0, colorfamily=vs.GRAY)
 
