@@ -10,7 +10,6 @@ that state something along the lines of me complaining about broken code.
 from math import floor
 import vapoursynth as vs
 from typing import Any, Dict, Callable
-from .cursed import _Descaler, _Scaler
 from vsutil import get_w, depth, get_y, iterate
 
 
@@ -18,11 +17,10 @@ core = vs.core
 
 
 def scradit_mask(
-    luma: vs.VideoNode, b: float = 1 / 3, c: float = 1 / 3,
-    height: int = 720, absthresh: float = 0.060, iters: int = 4,
-    descaler: _Descaler = core.descale.Debicubic,
-    upscaler: _Scaler = core.resize.Bicubic,
-    dekwargs: Dict = {}, upkwargs: Dict = {}
+    src_luma: vs.VideoNode,
+    rescaled_luma: vs.VideoNode,
+    height: int = 720,
+    absthresh: float = 0.060, iters: int = 4
 ) -> vs.VideoNode:
     """
     Credit masking function borrowed from Scrad.
@@ -42,12 +40,9 @@ def scradit_mask(
     :param upkwargs:    A dict with extra options for the upscaler.
     """
 
-    luma = depth(get_y(luma), 32)
+    luma = depth(get_y(src_luma), 32)
 
-    descaled = descaler(
-        luma, get_w(height, luma.width / luma.height),
-        height, b, c, **dekwargs
-    )
+    descaled = depth(get_y(rescaled_luma), 32)
 
     rescaled = upscaler(descaled, luma.width, luma.height, **upkwargs)
 
@@ -55,9 +50,7 @@ def scradit_mask(
 
     mask = iterate(mask, core.std.Maximum, iters)
 
-    mask = iterate(mask, core.std.Inflate, iters)
-
-    return mask  # noqa: R504
+    return iterate(mask, core.std.Inflate, iters)
 
 
 def detail_mask(
@@ -85,9 +78,7 @@ def detail_mask(
 
     mask = iterate(mask, core.std.Maximum, 4)
 
-    mask = iterate(mask, core.std.Inflate, 4)
-
-    return mask  # noqa: R504
+    return iterate(mask, core.std.Inflate, 4)
 
 
 def dehalo_mask(
