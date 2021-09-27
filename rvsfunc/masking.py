@@ -10,7 +10,7 @@ that state something along the lines of me complaining about broken code.
 from math import floor
 import vapoursynth as vs
 from typing import Any, Dict, Callable
-from vsutil import get_w, depth, get_y, iterate
+from vsutil import depth, get_y, iterate
 
 
 core = vs.core
@@ -42,9 +42,7 @@ def scradit_mask(
 
     luma = depth(get_y(src_luma), 32)
 
-    descaled = depth(get_y(rescaled_luma), 32)
-
-    rescaled = upscaler(descaled, luma.width, luma.height, **upkwargs)
+    rescaled = depth(get_y(rescaled_luma), 32)
 
     mask = core.std.Expr([luma, rescaled], f"x y - abs {absthresh} < 0 1 ?")
 
@@ -72,7 +70,7 @@ def detail_mask(
         raise ValueError("detail_mask: 'Variable-format clips not supported'")
 
     if sy.format.id != ry.format.id:
-        sy = core.resize.Point(sy, format=ry.format.id)
+        sy = core.resize.Bicubic(sy, format=ry.format.id)
 
     mask = core.std.Expr([sy, ry], "x y - abs").std.Binarize(thresh)
 
