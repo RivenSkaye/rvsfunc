@@ -111,7 +111,7 @@ def chromashifter(
         shifted = shifted_clips.get(shift)
 
         if shifted is None:
-            shifted = shifter(clip, src_left=shift)
+            shifted = shifter(clip, src_left=shift)  # type: ignore
             shifted_clips.update({shift: shifted})
 
         return shifted
@@ -126,7 +126,7 @@ def chromashifter(
     if maskfunc is core.std.Prewitt:
         mask_kwargs["planes"] = [0, 1, 2]
 
-    yuv = maskfunc(yuv, **mask_kwargs)
+    yuv = maskfunc(yuv, **mask_kwargs)  # type: ignore
 
     out = core.std.FrameEval(clip, get_shifted, yuv)
     out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)
