@@ -40,7 +40,9 @@ extend-select =
     # Typing collections. This is mostly for readability of code.
     TYCO1
 extend-ignore =
-    TYCO2
+    TYCO2,
+    RST301,
+    RST201
 # Quotes plugin: I like 'em double
 inline-quotes = double
 # Flake8-NOQA: Require codes
