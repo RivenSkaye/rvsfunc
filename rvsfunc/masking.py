@@ -92,7 +92,7 @@ def detail_mask(
 
 def dehalo_mask(
     clip: vs.VideoNode,
-    maskgen: Callable[[vs.VideoNode, Dict[str, Any]], vs.VideoNode] = core.std.Prewitt,
+    maskgen: Callable[[vs.VideoNode, Dict[str, Any]], vs.VideoNode] = core.std.Prewitt,  # noqa: E501
     iter_out: int = 2, iter_in: int = -1, inner: bool = False,
     outer: bool = False, **mask_args: Dict[str, Any]
 ) -> vs.VideoNode:
