@@ -85,11 +85,11 @@ def questionable_rescale(
     if get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:
         clip = depth(clip, 16, sample_type=vs.INTEGER)
 
+    chroma = clip.format.num_planes > 1
+
     rgv = core.rgvs.RemoveGrain(clip, mode=1)
 
     clamp, clip = depth(rgv, 32), depth(clip, 32)
-
-    chroma = clip.format.num_planes > 1
 
     if chroma:
         y, cy = get_y(clip), get_y(clamp)
@@ -122,7 +122,8 @@ def questionable_rescale(
         return descaled
 
     doubled = scaler(
-        nnedi3_rpow2(descaled, shift=correct_shift, cl=True), **scale_kwargs
+        nnedi3_rpow2(descaled),
+        **scale_kwargs
     )  # type: ignore
 
     if apply_mask:
