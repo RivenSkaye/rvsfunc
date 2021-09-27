@@ -9,7 +9,7 @@ that state something along the lines of me complaining about broken code.
 
 from math import floor
 import vapoursynth as vs
-from typing import Any, Dict, Callable
+from typing import Any, Dict, Callable, Optional
 from vsutil import depth, get_y, iterate
 
 
@@ -100,12 +100,12 @@ def dehalo_mask(
     :param outer:       Returns the outer mask for checking.
     :param mask_args:   Expanded as ``**kwargs`` for ``mask_gen``
     """
-    
+
     if not clip.format:
         raise ValueError("detail_mask: 'Variable-format clips not supported'")
-    
+
     maskgen = maskgen if maskgen else lambda c: core.std.Prewitt(c, [0])
-    
+
     if clip.format.num_planes > 1:
         clip = get_y(clip)
 
