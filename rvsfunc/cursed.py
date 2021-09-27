@@ -82,10 +82,10 @@ def questionable_rescale(
     if depth_out < 0:
         depth_out = get_depth(clip)
 
+    chroma = clip.format.num_planes > 1
+
     if get_depth(clip) > 16 or clip.format.sample_type == vs.FLOAT:
         clip = depth(clip, 16, sample_type=vs.INTEGER)
-
-    chroma = clip.format.num_planes > 1
 
     rgv = core.rgvs.RemoveGrain(clip, mode=1)
 
