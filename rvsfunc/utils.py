@@ -99,7 +99,7 @@ def nc_splice(
     if nc_filterfunc:
         nc = nc_filterfunc(nc, **kwargs)  # type: ignore
     elif use_internal:
-        nc = copy_credits(source[startframe:endframe + 1], nc, ext_mask)  # type: ignore  # noqa: E501
+        nc = copy_credits(source[startframe:endframe + 1], nc, ext_mask)
 
     return source[:startframe] + nc + source[endframe + 1:]
 
