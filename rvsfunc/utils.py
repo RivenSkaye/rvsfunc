@@ -15,12 +15,12 @@ from typing import Union, Optional, Callable, Any, List, Dict
 
 
 core = vs.core
-vs_api_below4 = vs.__api_version__.api_major < 4
+vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore
 
 
 def batch_index(
     paths: Union[List[str], str],
-    source_filter: Callable[[...], vs.VideoNode], show_list: bool = False,
+    source_filter: Callable[..., vs.VideoNode], show_list: bool = False,
     **src_args: Dict[str, Any]
 ) -> List[vs.VideoNode]:
     """
@@ -53,7 +53,7 @@ def batch_index(
 
     try:
         for p in paths:
-            sauces.append(source_filter(p, **src_args))  # type: ignore
+            sauces.append(source_filter(p, **src_args))
         if not show_list:
             del sauces
     except Exception:
