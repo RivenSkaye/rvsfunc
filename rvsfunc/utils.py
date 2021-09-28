@@ -11,11 +11,43 @@ are missing from the well known collections like ``vsutil``.
 import numpy as np
 import vapoursynth as vs
 from .masking import detail_mask
+from .errors import VariableFormatError
 from typing import Union, Optional, Callable, Any, List, Dict
 
 
 core = vs.core
 vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore
+
+
+def is_topleft(clip: vs.VideoNode) -> bool:
+    """ Simple function that checks if chroma is top-left aligned or not.
+
+    In any other case it's fairly safe to assume the chroma is aligned to the
+    center-left as was the default before 4K UHD BDs and Bt.2020 were a thing.
+    This is basically a more complex check for BT.2020 material.
+    """
+    if not clip.format:
+        raise VariableFormatError("is_topleft")
+
+    if clip.format.subsampling_h != 1 or clip.format.subsampling_w != 1:
+        return False
+
+    props = clip.get_frame(0).props
+
+    # If chromalocation is set, use it and return if it's left.
+    cloc = props.get("_ChromaLocation")
+    # If it exists, we just need to check if it's 0 or not
+    if cloc is not None:
+        return cloc == 2
+
+    # If the primaties are set (they should be) then return if it's BT.2020
+    prims = props.get("_Primaries")
+    if prims not in [None, 2]:
+        return prims == 9
+
+    # These should be the minimum 4:3 and 21:9 dimensions after cropping 4K
+    # with letter- and/or pillarboxing.
+    return clip.width >= 2880 and clip.height >= 1645
 
 
 def batch_index(

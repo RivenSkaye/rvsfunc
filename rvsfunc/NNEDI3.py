@@ -1,0 +1,185 @@
+from .errors import VariableFormatError
+from .utils import is_topleft
+from abc import ABCMeta, abstractmethod
+from typing import Any, Type, TypeVar
+import vsutil
+import vapoursynth as vs
+
+core = vs.core
+
+
+class NNEDI3Base(metaclass=ABCMeta):
+    """ Abstract Base Class for NNEDI3 wrappers.
+
+    Used for a modernized, non-shit version of nnedi3_rpow2.
+    As much as I would have liked it, API compatibility is not an option as
+    the old code was just too damn bad.
+
+    :param shift:           Whether or not to fix the chroma shift caused by the
+                            upsampling of subsampled chroma.
+    :param nnedi_shift:     Whether or not to fix the shift caused by NNEDI3.
+    :param nnedi_kwargs:    Additional kwargs to pass on to the NNEDI3 plugin.
+    """
+
+    NB = TypeVar("NB", bound="NNEDI3Base")
+
+    def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
+        self.shift = shift
+        self.kwargs = nnedi_kwargs
+
+    @abstractmethod
+    def nnedi(self, clip: vs.VideoNode, field: int,
+              *args: Any, **kwargs: Any) -> vs.VideoNode:
+        ...
+
+    def double_size(self, clip: vs.VideoNode, chroma: bool = True,
+                    iterations: int = 1) -> vs.VideoNode:
+        """ nnedi3_rpow2, except not bad. This does the acual rpow2'ing.
+
+        Uses a much simpler API than the original that assumes kwargs were
+        passed during instantiation of the class.
+
+        :param clip:        The clip to grow by powers of two.
+        :param chroma:      Whether or not to process chroma.
+        :param iterations:  How often to double frame sizes.
+                            This growth is exponential (2x, 4x, 8, ...)
+        """
+
+        # The amount of iterations has to be at least 1 and no more than 10.
+        if not 1 <= iterations <= 10:
+            raise ValueError("The amount of iterations for rpow2 may not "
+                             "be lower than 1 or higher than 9")
+
+        if not clip.format:
+            raise VariableFormatError("rpow2")
+
+        if clip.format.num_planes == 1:
+            chroma = False
+            planes = [clip]
+        else:
+            amnt = 3 if chroma else 1
+            tl = is_topleft(clip) if chroma else False
+            planes = vsutil.split(clip)[:amnt]
+
+        powd = []
+        planenum = 0
+
+        for plane in planes:
+            while iterations > 0:
+                # No fuckery with field since we're splitting planes
+                # Always use field 0 to keep center alignment
+                # Which is how luma and gray are aligned and should be handled
+                plane = self.nnedi(plane, 0, **self.kwargs).std.Transpose()
+                plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
+
+            if self.shift and planenum > 0:
+                sh = clip.format.subsampling_h not in [0, 2] and tl
+                sw = clip.format.subsampling_w in [0, 2]
+                shift = 0.25 - (0.25 * (clip.width / planes[0].width))
+                plane = plane.resize.Spline36(src_left=shift if sw else 0.0,
+                                              src_top=shift if sh else 0.0)
+            powd.append(plane)
+            planenum += 1
+            iterations -= 1
+
+        if not chroma or len(powd) == 1:
+            return powd[0]
+        else:
+            return core.std.ShufflePlanes(clips=powd, planes=[0, 0, 0],
+                                          colorfamily=clip.format.color_family)
+
+    @classmethod
+    def rpow2(cls: Type[NB], clip: vs.VideoNode, chroma: bool = True,
+              iterations: int = 1, shift: bool = True,
+              **nnedi_kwargs: Any) -> vs.VideoNode:
+        """ nnedi3_rpow2 as a classmethod for easy use.
+
+        **THIS FUNCTION IS NOT API-COMPATIBLE WITH 4re's ``nnedi3_rpow2``!**
+        Having gotten that out of the way, the function signature is heavily
+        simplified compared to the old one and so is the ``iterations`` argument
+        that replaces the old ``rfactor``.
+
+        :param clip:            The clip to exponentially double in size.
+        :param chroma:          Whether or not to process chroma.
+        :param iterations:      How often to double the clip's sizes.
+                                This is exponential growth (2x, 4x, 8x, ...)
+        :param shift:           Whether or not to fix the chroma shift caused by
+                                upsampling video.
+        :param nnedi_kwargs:    Additional kwargs to pass to NNEDI3.
+                                See the ``nnedi`` function for more information.
+        """
+        nn = cls(shift=shift, **nnedi_kwargs)
+        return nn.double_size(clip, chroma, iterations)
+
+
+class ZNEDI3(NNEDI3Base):
+    def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
+        super().__init__(shift, **nnedi_kwargs)
+
+    def nnedi(self, clip: vs.VideoNode, field: int,
+              *args: Any, **kwargs: Any) -> vs.VideoNode:
+        """ Wrapper for znedi3.nnedi3 for use with generalized NNEDI3 calls.
+
+        A separate function because defining a :py:class`typing.Protocol` for
+        all NNEDI3 plugins is impossible thanks to differing (kw)args.
+        """
+        nnkw = {
+            "dh": True,
+            "planes": 0,
+            "nsize": 0,
+            "nns": 3,
+            "opt": True
+        }
+        nnkw.update(self.kwargs)
+        nnkw.update(kwargs)
+
+        return core.znedi3.nnedi3(clip, field=field, **nnkw)  # type: ignore
+
+
+class NNEDI3(NNEDI3Base):
+    def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
+        super().__init__(shift, **nnedi_kwargs)
+
+    def nnedi(self, clip: vs.VideoNode, field: int,
+              *args: Any, **kwargs: Any) -> vs.VideoNode:
+        """ Wrapper for znedi3.nnedi3 for use with generalized NNEDI3 calls.
+
+        A separate function because defining a :py:class`typing.Protocol` for
+        all NNEDI3 plugins is impossible thanks to differing (kw)args.
+        """
+        nnkw = {
+            "dh": True,
+            "planes": 0,
+            "nsize": 0,
+            "nns": 3,
+            "opt": True
+        }
+        nnkw.update(self.kwargs)
+        nnkw.update(kwargs)
+
+        return core.nnedi3.nnedi3(clip, field=field, **nnkw)
+
+
+class NNEDI3CL(NNEDI3Base):
+    def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
+        super().__init__(shift, **nnedi_kwargs)
+
+    def nnedi(self, clip: vs.VideoNode, field: int,
+              *args: Any, **kwargs: Any) -> vs.VideoNode:
+        """ Wrapper for znedi3.nnedi3 for use with generalized NNEDI3 calls.
+
+        A separate function because defining a :py:class`typing.Protocol` for
+        all NNEDI3 plugins is impossible thanks to differing (kw)args.
+        """
+        nnkw = {
+            "dh": True,
+            "dw": False,
+            "planes": 0,
+            "nsize": 0,
+            "nns": 3,
+            "opt": True
+        }
+        nnkw.update(self.kwargs)
+        nnkw.update(kwargs)
+
+        return core.nnedi3cl.NNEDI3CL(clip, field=field, **nnkw)
