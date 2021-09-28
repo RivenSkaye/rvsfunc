@@ -50,6 +50,7 @@ Modules
    rvsfunc.cursed
    rvsfunc.dvd
    rvsfunc.masking
+   rvsfunc.NNEDI3
    rvsfunc.utils
 
 rvsfunc.cursed
@@ -58,7 +59,6 @@ rvsfunc.cursed
 Alias: ``rvsfunc.voodoo``
 
 .. autosummary::
-   rvsfunc.cursed.nnedi3_rpow2
    rvsfunc.cursed.questionable_rescale
 
 .. automodule:: rvsfunc.cursed
@@ -91,6 +91,13 @@ rvsfunc.masking
    :members:
    :undoc-members:
    :show-inheritance:
+
+rvsfunc.NNEDI3
+==============
+.. autosummary::
+   rvsfunc.NNEDI3.ZNEDI3
+   rvsfunc.NNEDI3.NNEDI3
+   rvsfunc.NNEDI3.NNEDI3CL
 
 rvsfunc.utils
 =============
