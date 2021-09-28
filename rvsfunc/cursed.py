@@ -1,5 +1,6 @@
 """
 Edgecase functions that were generalized for if I ever need them again.
+
 Most of these functions should not be used in the general use case. They're
 typically written for a very specific edgecase, but generalized for if I ever
 need them again. Currently only holds `questionable_rescale` which I mangled
@@ -8,9 +9,9 @@ from someone else's code that had a very similar edgecase.
 
 import vapoursynth as vs
 from .masking import detail_mask
+from .NNEDI3 import ZNEDI3
 from typing import Any, Dict, Callable, Optional
 from vsutil import depth, get_depth, get_w, get_y
-from nnedi3_rpow2 import nnedi3_rpow2
 
 
 core = vs.core
@@ -121,10 +122,7 @@ def questionable_rescale(
     if not scaler:
         return descaled
 
-    doubled = scaler(
-        nnedi3_rpow2(descaled),
-        **scale_kwargs
-    )  # type: ignore
+    doubled = ZNEDI3.rpow2(descaled, shift=correct_shift)
 
     if apply_mask:
         if not ext_mask:
