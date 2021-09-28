@@ -8,8 +8,9 @@ The main goal is to make the functions as flexible as possible, while still
 trying to keep sane defaults so minimum use should produce nice results.
 Good luck figuring out which functions you need, docs came soon™!
 
-If you spot any issues, you can find me on Discord as @Riven Skaye#0042,
-or contribute by `sending in a PR <https://github.com/RivenSkaye/rvsfunc/blob/master/CONTRIBUTING.md>`_!
+If you spot any issues, you can find me on Discord as @Riven Skaye#0042.
+You're also more than welcome to create an issue on GitHub,
+`or make a PR <https://github.com/RivenSkaye/rvsfunc/blob/master/CONTRIBUTING.md>`_!
 """
 
 from . import utils, masking, dvd, cursed
