@@ -10,9 +10,10 @@ Good luck figuring out which functions you need, docs came soon™!
 
 If you spot any issues, you can find me on Discord as @Riven Skaye#0042,
 or contribute by `sending in a PR <https://github.com/RivenSkaye/rvsfunc/blob/master/CONTRIBUTING.md>`_!
-"""  # noqa: E501 W505
+"""
 
-from . import utils, masking, dvd, cursed  # noqa: F401
+from . import utils, masking, dvd, cursed
+from .NNEDI3 import NNEDI3, ZNEDI3, NNEDI3CL
 
 # Alias for script compatibility
 batchindex = utils.batch_index

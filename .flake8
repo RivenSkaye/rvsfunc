@@ -13,7 +13,8 @@ extend-exclude =
     setup.py,
     docs,
     mypy-stubs,
-    *.pyi
+    *.pyi,
+    rvsfunc/__init__.py
 # "FOUR SPACES, ONE RELIGION" -- Vardë
 indent-size = 4
 # I'll increase this by popular demand. No more than 85 though!
