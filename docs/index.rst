@@ -1,22 +1,21 @@
-.. rvsfunc documentation master file, created by
-   sphinx-quickstart on Tue Aug 31 12:29:35 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Welcome to the documentation for rvsfunc!
+=========================================
 
-Docs for rvsfunc
-===================================
+Modules:
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+    :maxdepth: 3
 
-About
-=====
+    cursed
+    dvd
+    masking
+    NNEDI3
+    utils
 
 .. automodule:: rvsfunc
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    :members:
+
+Documentation for individual modules can be found to the left.
 
 Dependencies
 ============
@@ -24,9 +23,15 @@ Dependencies
 rvsfunc requires a couple other things to work properly:
 
 * `VapourSynth <https://github.com/vapoursynth/vapoursynth/releases>`_
+
+  * rvsfunc *should* be compatible with both APIv3 and APIv4
 * `vsutil <https://pypi.org/project/vsutil/>`_
 * `numpy <https://pypi.org/project/numpy>`_
 * `VapourSynth-descale <https://github.com/Irrational-Encoding-Wizardry/vapoursynth-descale>`_
+* `ZNEDI3 <https://github.com/sekrit-twc/znedi3>`_
+
+  * This is only required for :py:meth:`rvsfunc.cursed.questionable_rescale`,
+  * Other NNEDI plugins can be used with the :ref:`NNEDI3` module as well.
 
 Each of these dependencies may have their own dependencies, it is not my
 responsibility to maintain an exhaustive list. Typically any dependencies
@@ -42,87 +47,4 @@ regards to the exposed (sub)modules, functions, names and aliases. In the case
 of major and/or breaking changes, the affected versions will be listed on the
 relevant `PyPI page <https://pypi.org/project/rvsfunc/>`_ and in the README.md
 available on `Github <https://github.com/RivenSkaye/rvsfunc/>`_
-
-Modules
-=======
-
-.. autosummary::
-   rvsfunc.cursed
-   rvsfunc.dvd
-   rvsfunc.masking
-   rvsfunc.NNEDI3
-   rvsfunc.utils
-
-rvsfunc.cursed
-==============
-
-Alias: ``rvsfunc.voodoo``
-
-.. autosummary::
-   rvsfunc.cursed.questionable_rescale
-
-.. automodule:: rvsfunc.cursed
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-rvsfunc.dvd
-===========
-
-.. autosummary::
-   rvsfunc.dvd.chromashifter
-
-.. automodule:: rvsfunc.dvd
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-rvsfunc.masking
-===============
-
-.. autosummary::
-   rvsfunc.masking.scradit_mask
-   rvsfunc.masking.detail_mask
-   rvsfunc.masking.dehalo_mask
-   rvsfunc.masking.fineline_mask
-   rvsfunc.masking.eoe_convolution
-
-.. automodule:: rvsfunc.masking
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-rvsfunc.NNEDI3
-==============
-.. autosummary::
-   rvsfunc.NNEDI3.ZNEDI3
-   rvsfunc.NNEDI3.NNEDI3
-   rvsfunc.NNEDI3.NNEDI3CL
-
-rvsfunc.utils
-=============
-
-.. autosummary::
-   rvsfunc.utils.batch_index
-   rvsfunc.utils.nc_splice
-   rvsfunc.utils.copy_credits
-
-.. automodule:: rvsfunc.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Credits
-=======
-
-Shoutout to all the great people that contribute to rvsfunc, if you want your
-name on this list, feel free to fork & PR your contributions.
-
-All of them can be seen `on GitHub <https://github.com/RivenSkaye/rvsfunc/graphs/contributors>`_
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+One should expect any non-patch upgrade to come with the risk of breakage.
