@@ -62,5 +62,6 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 autosummary_generate = True
+autodoc_preserve_defaults = True
 
 autodoc_mock_imports = ["vsutil", "vapoursynth"]
