@@ -16,11 +16,12 @@ from typing import Union, Optional, Callable, Any, List, Dict
 
 
 core = vs.core
-vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore
+vs_api_below4: Optional[bool] = None
 
 
 def is_topleft(clip: vs.VideoNode) -> bool:
-    """ Simple function that checks if chroma is top-left aligned or not.
+    """
+    Simple function that checks if chroma is top-left aligned or not.
 
     In any other case it's fairly safe to assume the chroma is aligned to the
     center-left as was the default before 4K UHD BDs and Bt.2020 were a thing.
@@ -36,7 +37,7 @@ def is_topleft(clip: vs.VideoNode) -> bool:
 
     # If chromalocation is set, use it and return if it's left.
     cloc = props.get("_ChromaLocation")
-    # If it exists, we just need to check if it's 0 or not
+    # If it exists, we just need to check if it's 2 or not
     if cloc is not None:
         return cloc == 2
 
@@ -159,6 +160,12 @@ def copy_credits(
 
 
 def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
+    """
+    Simple wrapper to turn a video frame into an numpy array
+    """
+    global vs_api_below4
+    if vs_api_below4 is None:
+        vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore
     return np.dstack([
         f.get_read_array(p) for p in range(f.format.num_planes)
     ] if vs_api_below4 else f)

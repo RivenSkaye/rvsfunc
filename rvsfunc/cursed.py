@@ -1,7 +1,6 @@
-"""
-Edgecase functions that were generalized for if I ever need them again.
+""" Edgecase functions that were generalized for if I ever need them again.
 
-Most of these functions should not be used in the general use case. They're
+These functions should probably not be used in the general use case. They're
 typically written for a very specific edgecase, but generalized for if I ever
 need them again. Currently only holds `questionable_rescale` which I mangled
 from someone else's code that had a very similar edgecase.
@@ -31,10 +30,12 @@ def questionable_rescale(
 ) -> vs.VideoNode:
     """
     Rescale function by Zastin for Doga Kobo, edited for reusability.
+
     It's originally written for Doga Kobo material, since they have some weird
     post-processing going on, making a normal descale impossible. It applies
     some Expression magic for fixing some common Doga Kobo issues.
     USE AT YOUR OWN RISK.
+
     :param clip:            YUV input clip, integer format. Will be dithered
                             down if required.
     :param height:          The height to descale to.

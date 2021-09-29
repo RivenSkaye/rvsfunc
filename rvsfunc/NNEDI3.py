@@ -9,15 +9,20 @@ core = vs.core
 
 
 class NNEDI3Base(metaclass=ABCMeta):
-    """ Abstract Base Class for NNEDI3 wrappers.
+    """
+    Abstract Base Class for NNEDI3 wrappers.
 
-    Used for a modernized, non-shit version of nnedi3_rpow2.
-    As much as I would have liked it, API compatibility is not an option as
-    the old code was just too damn bad.
+    This is currently mainly in use for a modernized and properly functional
+    version of nnedi3_rpow2, which is available as a classmethod for all of
+    the implementing classes.
+
+    This is a generalized base class that aims to implement generic functions
+    that can be performed with every NNEDI3 plugin. To define plugin-specific
+    functionality and behavior, the implementing subclasses are used.
+    Documentation in this class applies to *all* subclasses as well.
 
     :param shift:           Whether or not to fix the chroma shift caused by the
                             upsampling of subsampled chroma.
-    :param nnedi_shift:     Whether or not to fix the shift caused by NNEDI3.
     :param nnedi_kwargs:    Additional kwargs to pass on to the NNEDI3 plugin.
     """
 
@@ -30,11 +35,26 @@ class NNEDI3Base(metaclass=ABCMeta):
     @abstractmethod
     def nnedi(self, clip: vs.VideoNode, field: int,
               *args: Any, **kwargs: Any) -> vs.VideoNode:
+        """
+        A simple wrapper function for calling a NNEDI3 implementation.
+
+        This abstractmethod and all concrete implementations only make the
+        call to the NNEDI3 implementation a subclass wraps around. Any other
+        logic being applied such as using NNEDI3 for AA must be a different
+        function that calls this method instead of the actual plugin.
+        ``*args`` should be blindly passed to the plugin and ``*kwargs``
+        should be used to update a predefined dict of defaults defined in the
+        implementations of this method.
+
+        :param clip:        The clip to call the NNEDI3 plugin with.
+        :param field:       The ``field`` parameter for NNEDI3.
+        """
         ...
 
     def double_size(self, clip: vs.VideoNode, chroma: bool = True,
                     iterations: int = 1) -> vs.VideoNode:
-        """ nnedi3_rpow2, except not bad. This does the acual rpow2'ing.
+        """
+        nnedi3_rpow2, except not bad. This does the acual rpow2'ing.
 
         Uses a much simpler API than the original that assumes kwargs were
         passed during instantiation of the class.
@@ -65,22 +85,23 @@ class NNEDI3Base(metaclass=ABCMeta):
         planenum = 0
 
         for plane in planes:
-            while iterations > 0:
+            plane_iters = iterations
+            while plane_iters > 0:
                 # No fuckery with field since we're splitting planes
                 # Always use field 0 to keep center alignment
                 # Which is how luma and gray are aligned and should be handled
                 plane = self.nnedi(plane, 0, **self.kwargs).std.Transpose()
-                plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
+                plane = self.nnedi(plane, 0, **self.kwargs).std.Transpose()
+                plane_iters -= 1
 
             if self.shift and planenum > 0:
                 sh = clip.format.subsampling_h not in [0, 2] and tl
-                sw = clip.format.subsampling_w in [0, 2]
+                sw = clip.format.subsampling_w not in [0, 2]
                 shift = 0.25 - (0.25 * (clip.width / planes[0].width))
                 plane = plane.resize.Spline36(src_left=shift if sw else 0.0,
                                               src_top=shift if sh else 0.0)
             powd.append(plane)
             planenum += 1
-            iterations -= 1
 
         if not chroma or len(powd) == 1:
             return powd[0]
@@ -92,7 +113,8 @@ class NNEDI3Base(metaclass=ABCMeta):
     def rpow2(cls: Type[NB], clip: vs.VideoNode, chroma: bool = True,
               iterations: int = 1, shift: bool = True,
               **nnedi_kwargs: Any) -> vs.VideoNode:
-        """ nnedi3_rpow2 as a classmethod for easy use.
+        """
+        nnedi3_rpow2 as a classmethod for easy use.
 
         **THIS FUNCTION IS NOT API-COMPATIBLE WITH 4re's ``nnedi3_rpow2``!**
         Having gotten that out of the way, the function signature is heavily
@@ -113,16 +135,14 @@ class NNEDI3Base(metaclass=ABCMeta):
 
 
 class ZNEDI3(NNEDI3Base):
+    """
+    A wrapper for the znedi3 plugin, also available as ``rvsfunc.znedi3``.
+    """
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
     def nnedi(self, clip: vs.VideoNode, field: int,
               *args: Any, **kwargs: Any) -> vs.VideoNode:
-        """ Wrapper for znedi3.nnedi3 for use with generalized NNEDI3 calls.
-
-        A separate function because defining a :py:class`typing.Protocol` for
-        all NNEDI3 plugins is impossible thanks to differing (kw)args.
-        """
         nnkw = {
             "dh": True,
             "planes": 0,
@@ -137,16 +157,14 @@ class ZNEDI3(NNEDI3Base):
 
 
 class NNEDI3(NNEDI3Base):
+    """
+    A wrapper for the nnedi3 plugin, also available as ``rvsfunc.nnedi3``.
+    """
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
     def nnedi(self, clip: vs.VideoNode, field: int,
               *args: Any, **kwargs: Any) -> vs.VideoNode:
-        """ Wrapper for znedi3.nnedi3 for use with generalized NNEDI3 calls.
-
-        A separate function because defining a :py:class`typing.Protocol` for
-        all NNEDI3 plugins is impossible thanks to differing (kw)args.
-        """
         nnkw = {
             "dh": True,
             "planes": 0,
@@ -161,16 +179,14 @@ class NNEDI3(NNEDI3Base):
 
 
 class NNEDI3CL(NNEDI3Base):
+    """
+    A wrapper for the NNEDI3CL plugin, also available as ``rvsfunc.nnedi3cl``.
+    """
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
     def nnedi(self, clip: vs.VideoNode, field: int,
               *args: Any, **kwargs: Any) -> vs.VideoNode:
-        """ Wrapper for znedi3.nnedi3 for use with generalized NNEDI3 calls.
-
-        A separate function because defining a :py:class`typing.Protocol` for
-        all NNEDI3 plugins is impossible thanks to differing (kw)args.
-        """
         nnkw = {
             "dh": True,
             "dw": False,

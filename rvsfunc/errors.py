@@ -14,7 +14,7 @@ core = vs.core
 
 class VariableFormatError(TypeError):
     """
-    Exception raised when a VideoFormat is not allowed.
+    Raised when a function only processes one type of VideoFormat at a time.
     """
 
     def __init__(self, fn_name: str):

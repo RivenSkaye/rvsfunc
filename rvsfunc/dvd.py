@@ -1,5 +1,6 @@
 """
 Functions written specifically for issues common or exclusive to DVDs.
+
 DVDs, ancient as the specs and carriers are, come with their fair share of
 typical issues. Some of the more well-known problems are things like getting
 telecined before editing, chroma shifts that change from scene to scene and
@@ -25,13 +26,16 @@ def chromashifter(
     mask_kwargs: Dict = {},
     shifter: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Point
 ) -> vs.VideoNode:
-    """ Automatically fixes chroma shifts, at the very least by approximation.
+    """
+    Automatically fixes chroma shifts, at the very least by approximation.
+
     This function takes in a clip and scales it to a 4x larger YUV444P clip.
     It then generates edgemasks over all of the planes to be used in distance
     calculations to figure out the proper value to shift chroma with.
     The shift is applied to the otherwise untouched input clip.
     Assumes the shift is the same for the U and V planes.
     Actually fast now thanks to EoE :eoehead:
+
     :param clip: vs.VideoNode:  The clip to process. This may take a while.
     :param wthresh: int:        The threshold for white values to use in the
                                 calculations for proper shifting.
