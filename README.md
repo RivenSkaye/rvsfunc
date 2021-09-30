@@ -22,6 +22,14 @@ import rvsfunc as INOX # Dutch people will get the joke
 import literally_any_other_func as laof
 ```
 
+# Deprecations
+
+Sometimes some bits and pieces get deprecated. This section lists what'll disappear soon.
+```diff
+- rvsfunc.cursed
++ rvsfunc.edgecase
+```
+
 # Installation
 
 At some point this was a monolithic `.py` file. Delete that if you still have
