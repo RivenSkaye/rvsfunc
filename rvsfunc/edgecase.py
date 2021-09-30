@@ -30,8 +30,8 @@ def chunked_filter(clip: vs.VideoNode,
     grid-based chunks to apply the filter to subsections of the clip.
     Chunks are then stacked into new clips that keep them in the same place as
     the corresponding chunk of the next frame to allow for temporal filters to
-    work with the same area of the clip as if it was never split.
-    *Might impact spatial filters negatively near the splitting lines.*
+    work with the same area of the clip as if it was never split. Spatial
+    filters might be impacted near the edges of chunks.
 
     :param clip:        The clip to chunk and filter.
     :param filter:      The filter to apply to the chunked clips.
@@ -41,8 +41,9 @@ def chunked_filter(clip: vs.VideoNode,
     :param hchunks:     The minimum amount of horizontal chunks to use.
     :param vchunks:     The minimum amount of vertical chunks to use.
     """
+
     lh, ch = clip.height, clip.height/2
-    lw, cw = clip.height, clip.height/2
+    lw, cw = clip.width, clip.width/2
     while lh % vchunks > 0 and ch % vchunks > 0:
         vchunks += 1
 
@@ -51,13 +52,13 @@ def chunked_filter(clip: vs.VideoNode,
 
     height = int(lh / vchunks)
     width = int(lw / hchunks)
-
     rows = []
-    for x in range(int(clip.height/vchunks)):
+
+    for x in range(0, vchunks):
         chunks = []
-        for y in range(int(clip.width/hchunks)):
+        for y in range(0, hchunks):
             chunk = core.std.CropAbs(clip, width=width, height=height,
-                                     left=x*width, top=y*height)
+                                     left=y*width, top=x*height)
             chunks.append(func(chunk))
         rows.append(core.std.StackHorizontal(clips=chunks))
     return core.std.StackVertical(clips=rows)
