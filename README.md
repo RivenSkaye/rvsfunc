@@ -28,7 +28,12 @@ Sometimes some bits and pieces get deprecated. This section lists what'll disapp
 ```diff
 - rvsfunc.cursed
 + rvsfunc.edgecase
+- nnedi3_rpow2
++ NNEDI3 classes
++ rpow2 classmethods
 ```
+The submodule `rvsfunc.cursed` is has been renamed. An alias is in place for now,
+but this will be removed for the next release.
 
 # Installation
 
