@@ -6,7 +6,7 @@ Modules:
 .. toctree::
     :maxdepth: 3
 
-    cursed
+    edgecase
     dvd
     masking
     NNEDI3
@@ -30,8 +30,8 @@ rvsfunc requires a couple other things to work properly:
 * `VapourSynth-descale <https://github.com/Irrational-Encoding-Wizardry/vapoursynth-descale>`_
 * `ZNEDI3 <https://github.com/sekrit-twc/znedi3>`_
 
-  * This is only required for :py:meth:`rvsfunc.cursed.questionable_rescale`,
-  * Other NNEDI plugins can be used with the :ref:`NNEDI3` module as well.
+  * This is only required for :py:meth:`rvsfunc.edgecase.questionable_rescale`,
+  * Other NNEDI plugins can be used with the :ref:`NNEDI3` as well.
 
 Each of these dependencies may have their own dependencies, it is not my
 responsibility to maintain an exhaustive list. Typically any dependencies
