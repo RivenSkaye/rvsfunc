@@ -32,6 +32,7 @@ setup(
         "Topic :: Multimedia :: Graphics"
     ],
     project_urls={
-        "tracker": "https://github.com/RivenSkaye/rvsfunc/issues"
+        "Bug Tracker": "https://github.com/RivenSkaye/rvsfunc/issues",
+        "Docs": "https://rvsfunc.tae.moe/"
     }
 )
