@@ -19,6 +19,50 @@ _Descaler = Callable[[vs.VideoNode, int, int, Any, Any, Any], vs.VideoNode]
 _Scaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
 
 
+def chunked_filter(clip: vs.VideoNode,
+                   func: Callable[[vs.VideoNode], vs.VideoNode],
+                   *, hchunks: int = 3, vchunks: int = 3) -> vs.VideoNode:
+    """
+    Apply a filter to video in blocks of video smaller than the clip's surface.
+
+    This is a utility function written for certain functions or filters don't
+    handle frames or clips over a certain size. It splits the clip into
+    grid-based chunks to apply the filter to subsections of the clip.
+    Chunks are then stacked into new clips that keep them in the same place as
+    the corresponding chunk of the next frame to allow for temporal filters to
+    work with the same area of the clip as if it was never split.
+    *Might impact spatial filters negatively near the splitting lines.*
+
+    :param clip:        The clip to chunk and filter.
+    :param filter:      The filter to apply to the chunked clips.
+                        It's recommended to supply either a function that
+                        takes the clip as its only argument, or to supply a
+                        partial to supply (kw)args to the filter.
+    :param hchunks:     The minimum amount of horizontal chunks to use.
+    :param vchunks:     The minimum amount of vertical chunks to use.
+    """
+    lh, ch = clip.height, clip.height/2
+    lw, cw = clip.height, clip.height/2
+    while lh % vchunks > 0 and ch % vchunks > 0:
+        vchunks += 1
+
+    while lw % hchunks > 0 and cw % hchunks > 0:
+        hchunks += 1
+
+    height = int(lh / vchunks)
+    width = int(lw / hchunks)
+
+    rows = []
+    for x in range(int(clip.height/vchunks)):
+        chunks = []
+        for y in range(int(clip.width/hchunks)):
+            chunk = core.std.CropAbs(clip, width=width, height=height,
+                                     left=x*width, top=y*height)
+            chunks.append(func(chunk))
+        rows.append(core.std.StackHorizontal(clips=chunks))
+    return core.std.StackVertical(clips=rows)
+
+
 def questionable_rescale(
     clip: vs.VideoNode, height: int, b: float = 1 / 3, c: float = 1 / 3,
     descaler: _Descaler = core.descale.Debicubic,

@@ -55,7 +55,7 @@ def detail_mask(
     Generates a fairly basic detail mask, mostly for descaling purposes.
 
     This is mostly used to pick up on detail *lost* in
-    :py:func:`.cursed.questionable_rescale` as per Zastin's original script.
+    :py:func:`.edgecase.questionable_rescale` as per Zastin's original script.
     Catches most if not all elements in a different native resolution
 
     :param source:      The clip to generate the mask for.
