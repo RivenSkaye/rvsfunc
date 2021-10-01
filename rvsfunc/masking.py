@@ -7,8 +7,9 @@ expect some stuff to get added and removed infrequently and a fair few commits
 that state something along the lines of me complaining about broken code.
 """
 
-from math import floor
 import vapoursynth as vs
+from .errors import VariableFormatError
+from math import floor
 from typing import Callable, Optional
 from vsutil import depth, get_y, iterate
 
@@ -66,7 +67,7 @@ def detail_mask(
     sy, ry = get_y(source), get_y(rescaled)
 
     if not (sy.format and ry.format):
-        raise ValueError("detail_mask: 'Variable-format clips not supported'")
+        raise VariableFormatError("detail_mask")
 
     if sy.format.id != ry.format.id:
         sy = core.resize.Bicubic(sy, format=ry.format.id)
@@ -101,7 +102,7 @@ def dehalo_mask(
     """
 
     if not clip.format:
-        raise ValueError("detail_mask: 'Variable-format clips not supported'")
+        raise VariableFormatError("dehalo_mask")
 
     maskgen = maskgen if maskgen else lambda c: core.std.Prewitt(c, [0])
 

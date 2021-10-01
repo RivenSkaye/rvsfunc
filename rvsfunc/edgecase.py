@@ -9,6 +9,7 @@ from someone else's code that had a very similar edgecase.
 import vapoursynth as vs
 from .masking import detail_mask
 from .NNEDI3 import ZNEDI3
+from .errors import VariableFormatError, VariableResolutionError
 from typing import Any, Dict, Callable, Optional
 from vsutil import depth, get_depth, get_w, get_y
 
@@ -111,14 +112,10 @@ def questionable_rescale(
     """
 
     if clip.width == 0 or clip.height == 0:
-        raise vs.Error(
-            "questionable_descale: var-res clips are not supported. \
-            Please slice the clip into several same-res clips or \
-            descale in another way."
-        )
+        raise VariableResolutionError("questionable_rescale")
 
     if not clip.format:
-        raise ValueError("questionable rescale: no variable format clips!")
+        raise VariableFormatError("questionable_rescale")
 
     if scale_kwargs.get("width") is None:
         scale_kwargs["width"] = clip.width

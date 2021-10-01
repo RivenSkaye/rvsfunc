@@ -14,6 +14,7 @@ from math import floor
 import vapoursynth as vs
 from .utils import frame_to_array
 from .masking import eoe_convolution
+from .errors import VariableFormatError, YUVError
 from typing import Callable, Dict, Any
 
 
@@ -61,22 +62,10 @@ def chromashifter(
     _fname = "rvsfunc chromashifter:"
 
     if not clip.format:
-        raise vs.Error(
-            f"{_fname} The clip must have a constant format. "
-            "Please convert or split the clip."
-        )
+        raise VariableFormatError(_fname)
 
     if clip.format.color_family is not vs.YUV:
-        raise vs.Error(
-            f"{_fname} The clip MUST be of the YUV color family. "
-            "Please convert it before calling this function."
-        )
-
-    if clip.format.num_planes < 3:
-        raise vs.Error(
-            f"{_fname} This function requires all three planes in "
-            "order to calculate proper shifts."
-        )
+        raise YUVError(_fname)
 
     shifted_clips: Dict[float, vs.VideoNode] = {0: clip}
 
