@@ -6,6 +6,7 @@ Modules:
 .. toctree::
     :maxdepth: 3
 
+    errors
     edgecase
     dvd
     masking
