@@ -15,5 +15,5 @@ required like VarRes or variable format video.
    :nosignatures:
 
    rvsfunc.errors.VariableFormatError
-   rvsfunc..errors.VariableResolutionError
+   rvsfunc.errors.VariableResolutionError
    rvsfunc.errors.YUVError
