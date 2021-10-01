@@ -1,9 +1,9 @@
 """
 Descriptive and useful errors, made with ease of use in mind.
 
-The error classes described in this file are to be used wheb erroneous or
-otherwise undesirable things are happening.
-Basically they exist to not throw a generic error and instead provide clear
+The error classes described here are to be used when erroneous or otherwise
+undesirable things are happening, like passing unsupported types of video.
+Mostly they exist to not throw a generic error and instead provide clear
 information about what went wrong. All they should need is the name of the
 function raising the error unless stated otherwise.
 """

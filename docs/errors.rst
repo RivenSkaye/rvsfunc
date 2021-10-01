@@ -17,3 +17,7 @@ required like VarRes or variable format video.
    rvsfunc.errors.VariableFormatError
    rvsfunc.errors.VariableResolutionError
    rvsfunc.errors.YUVError
+
+.. automodule:: rvsfunc.errors
+   :members:
+   :undoc-members:
