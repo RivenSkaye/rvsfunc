@@ -81,7 +81,7 @@ def detail_mask(
 
 
 def finedehalo_mask(clip: vs.VideoNode, thresh: int = 24320, *,
-                     chroma: bool = False) -> vs.VideoNode:
+                    chroma: bool = False) -> vs.VideoNode:
     """
     Dehalo mask based on :py:meth:`fineline_mask` for protecting small things.
 
