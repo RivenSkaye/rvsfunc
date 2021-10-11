@@ -52,7 +52,7 @@ class NNEDI3Base(metaclass=ABCMeta):
         call to the NNEDI3 implementation a subclass wraps around. Any other
         logic being applied such as using NNEDI3 for AA must be a different
         function that calls this method instead of the actual plugin.
-        ``*args`` should be blindly passed to the plugin and ``*kwargs``
+        ``*args`` should be blindly passed to the plugin and ``**kwargs``
         should be used to update a predefined dict of defaults defined in the
         implementations of this method.
 
