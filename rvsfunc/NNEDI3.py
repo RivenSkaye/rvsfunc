@@ -1,3 +1,13 @@
+"""
+A module for functions built on NNEDI3 plugins in a more modern fashion.
+
+This module defines a few classes that have been set up to wrap around NNEDI3
+implementations. They allow for using them in a streamlined fashion with sane
+defaults. The main objective is to provide a collection of NNEDI3-based functions
+in a central place, as well as modernizing them.
+"""
+
+
 from .errors import VariableFormatError
 from .utils import is_topleft
 from abc import ABCMeta, abstractmethod
@@ -136,7 +146,7 @@ class NNEDI3Base(metaclass=ABCMeta):
 
 class ZNEDI3(NNEDI3Base):
     """
-    A wrapper for the znedi3 plugin, also available as ``rvsfunc.znedi3``.
+    A wrapper for the znedi3 plugin.
     """
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
@@ -158,7 +168,7 @@ class ZNEDI3(NNEDI3Base):
 
 class NNEDI3(NNEDI3Base):
     """
-    A wrapper for the nnedi3 plugin, also available as ``rvsfunc.nnedi3``.
+    A wrapper for the nnedi3 plugin.
     """
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
@@ -180,7 +190,7 @@ class NNEDI3(NNEDI3Base):
 
 class NNEDI3CL(NNEDI3Base):
     """
-    A wrapper for the NNEDI3CL plugin, also available as ``rvsfunc.nnedi3cl``.
+    A wrapper for the NNEDI3CL plugin.
     """
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
