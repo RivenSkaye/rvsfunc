@@ -11,7 +11,8 @@ import vapoursynth as vs
 from .errors import VariableFormatError
 from math import floor
 from typing import Callable, Optional
-from vsutil import depth, get_y, iterate
+from vsutil import depth, get_y, iterate, split, join
+from functools import partial
 
 
 core = vs.core
@@ -77,6 +78,60 @@ def detail_mask(
     mask = iterate(mask, core.std.Maximum, 4)
 
     return iterate(mask, core.std.Inflate, 4)
+
+
+def finedehalo_mask(clip: vs.VideoNode, thresh: int = 24320, *,
+                     chroma: bool = False) -> vs.VideoNode:
+    """
+    Dehalo mask based on :py:meth:`fineline_mask` for protecting small things.
+
+    A masking function designed to protect textures and very thin linework when
+    and very fine detail like textures when performing more aggressive forms
+    of filtering. Fairly large values are required for the threshold because
+    all internal processing is done in 16 bit.
+    The returned mask is the same depth as the input ``clip``.
+
+    :param clip:        The clip to generate the mask for.
+    :param thresh:      The threshold value used for :py:meth:`fineline_mask`.
+                        Don't forget to scale the value for 16-bit video.
+    :param chroma:      Whether or not to mask chroma.
+    """
+
+    if not clip.format:
+        raise VariableFormatError("fine_dehalo_mask")
+
+    def _gen_mask(plane: vs.VideoNode, thr: int) -> vs.VideoNode:
+        flm = depth(fineline_mask(plane, thr), 16)
+        dhm = depth(dehalo_mask(plane, outer=True), 16)
+
+        sob = partial(core.std.Sobel, planes=[0])
+        dhinner = depth(dehalo_mask(plane, sob, inner=True), 16)
+
+        yeet = core.std.Expr([flm, dhm], "y x -")
+        dhm2 = core.std.Expr([dhm, yeet], "x y -").std.Binarize(threshold=thr)
+
+        return core.std.Expr([dhm2, dhinner], "x y -").std.Binarize(threshold=thr)
+
+    dither = False
+
+    depth_in = clip.format.bits_per_sample
+    if not depth_in == 16:
+        dither = True
+        clip = depth(clip, 16, sample_type=vs.INTEGER)
+
+    if chroma:
+        planes = split(clip)
+        maskplanes = []
+
+        for p in planes:
+            maskplanes.append(_gen_mask(p, thresh))
+
+        mask = join(maskplanes)
+    else:
+        y = get_y(clip)
+        mask = _gen_mask(y, thresh)
+
+    return depth(mask, depth_in) if dither else mask
 
 
 def dehalo_mask(
