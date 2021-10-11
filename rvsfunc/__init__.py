@@ -17,7 +17,6 @@ from . import utils, masking, dvd, edgecase, NNEDI3
 
 # Alias for script compatibility
 batchindex = utils.batch_index
-cursed = edgecase
 
 # Utility aliases
 znedi3 = NNEDI3.ZNEDI3
