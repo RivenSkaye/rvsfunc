@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
+
       - name: Get version number
         run: |
           echo "RVS_VER=v$(cat .version)" >> $GITHUB_ENV
@@ -35,5 +37,7 @@ jobs:
               ref: `${RVS_VER}`
               sha: context.sha
             })
+
+      - name: Fallback
         if: steps.tagcheck.outputs.exists == 'true'
         run: echo "Nothing to see here, move along citizen"
