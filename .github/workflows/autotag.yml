@@ -1,0 +1,38 @@
+name: Check and create tag
+on:
+  push:
+    branches:
+      - master
+  pull-request:
+    branches:
+      - master
+
+jobs:
+  New Version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get version number
+        run: |
+          echo "RVS_VER=v$(cat .version)" >> $GITHUB_ENV
+
+      - name: Check if version exists
+        uses: mukunku/tag-exists-action@v1.0.0
+        id: tagcheck
+        with:
+          tag: $RVS_VER
+
+      - name: Make tag
+        if: steps.tagcheck.outputs.exists == 'true'
+        run: exit 0
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { RVS_VER } = process.env
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+              ref: `${RVS_VER}`
+              sha: context.sha
+            })
