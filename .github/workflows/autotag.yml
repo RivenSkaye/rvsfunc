@@ -22,7 +22,7 @@ jobs:
         uses: mukunku/tag-exists-action@v1.0.0
         id: tagcheck
         with:
-          tag: $RVS_VER
+          tag: ${{ env.RVS_VER }}
 
       - name: Make tag
         uses: actions/github-script@v3
