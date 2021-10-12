@@ -42,3 +42,11 @@ jobs:
           with:
             user: __token__
             password: ${{ secrets.PYPI_TOKEN }}
+        - name: Make GH release
+          uses: marvinpinto/action-automatic-releases@v1.2.1
+          with:
+            repo_token: ${{ secrets.GITHUB_TOKEN }}
+            prerelease: false
+            files: |
+            LICENSE
+            dist/rvsfunc*.tar.gz
