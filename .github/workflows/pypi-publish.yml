@@ -49,4 +49,4 @@ jobs:
             prerelease: false
             files: |
             LICENSE
-            dist/rvsfunc*.tar.gz
+            dist/*.tar.gz
