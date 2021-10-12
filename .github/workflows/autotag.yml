@@ -23,9 +23,8 @@ jobs:
           tag: $RVS_VER
 
       - name: Make tag
-        if: steps.tagcheck.outputs.exists == 'true'
-        run: exit 0
         uses: actions/github-script@v3
+        if: steps.tagcheck.outputs.exists == 'false'
         with:
           github-token: ${{ github.token }}
           script: |
@@ -36,3 +35,5 @@ jobs:
               ref: `${RVS_VER}`
               sha: context.sha
             })
+        if: steps.tagcheck.outputs.exists == 'true'
+        run: echo "Nothing to see here, move along citizen"
