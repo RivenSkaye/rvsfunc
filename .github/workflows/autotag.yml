@@ -35,8 +35,8 @@ jobs:
             const { RVS_VER } = process.env
             github.git.createRef({
               owner: context.repo.owner,
-              repo: context.repo.repo
-              ref: `refs/tags/${RVS_VER}`
+              repo: context.repo.repo,
+              ref: `refs/tags/${RVS_VER}`,
               sha: context.sha
             })
 
