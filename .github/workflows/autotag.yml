@@ -30,7 +30,7 @@ jobs:
         uses: actions/github-script@v3
         if: steps.tagcheck.outputs.exists == 'false'
         with:
-          github-token: ${{ github.token }}
+          github-token: ${{ secrets.WORKFLOW_TOKEN }}
           script: |
             const { RVS_VER } = process.env
             github.git.createRef({
