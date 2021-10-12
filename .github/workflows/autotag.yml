@@ -36,7 +36,7 @@ jobs:
             github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo
-              ref: `${RVS_VER}`
+              ref: `refs/tags/${RVS_VER}`
               sha: context.sha
             })
 
