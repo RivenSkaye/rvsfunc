@@ -49,4 +49,4 @@ jobs:
             prerelease: false
             files: |
             LICENSE
-            dist/*.tar.gz
+            **.tar.gz
