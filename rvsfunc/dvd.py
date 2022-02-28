@@ -119,7 +119,7 @@ def chromashifter(
     if maskfunc is core.std.Prewitt:
         mask_kwargs["planes"] = [0, 1, 2]
 
-    yuv = maskfunc(yuv, **mask_kwargs)  # type: ignore
+    yuv = maskfunc(yuv, **mask_kwargs)
 
     out = core.std.FrameEval(clip, get_shifted, yuv)
     out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)

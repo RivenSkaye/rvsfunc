@@ -167,5 +167,5 @@ def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
     if vs_api_below4 is None:
         vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore
     return np.dstack([
-        f.get_read_array(p) for p in range(f.format.num_planes)
+        f.get_read_array(p) for p in range(f.format.num_planes)  # type: ignore
     ] if vs_api_below4 else f)
