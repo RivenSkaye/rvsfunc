@@ -18,7 +18,4 @@ test.vpy
 .vspreview/
 
 # Documentation stuff #
-docs/_build/*
-docs/_static/*
-docs/_templates/*
-docs/make*
+docs/build/*
