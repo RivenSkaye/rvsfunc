@@ -165,11 +165,15 @@ def questionable_rescale(
     if not scaler:
         return descaled
 
-    doubled = ZNEDI3.rpow2(descaled, shift=correct_shift)
+    doubled = scaler(ZNEDI3.rpow2(descaled, shift=correct_shift),
+                     clip.width, clip.height, None)
 
     if apply_mask:
         if not ext_mask:
-            mask = detail_mask(y, doubled, thresh=mask_thresh)
+            masky = depth(y, 32)
+            dbld = depth(doubled, 32)
+            mask = detail_mask(masky, dbld, thresh=mask_thresh)
+            mask = depth(mask, 16, sample_type=vs.INTEGER)
         else:
             mask = depth(ext_mask, get_depth(doubled))
         if return_mask:
