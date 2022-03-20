@@ -25,7 +25,7 @@ def chromashifter(
     clip: vs.VideoNode, wthresh: int = 31, vertical: bool = False,
     maskfunc: Callable[[vs.VideoNode], vs.VideoNode] = eoe_convolution,
     mask_kwargs: Dict = {},
-    shifter: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Point
+    shifter: Callable[[vs.VideoNode, Any], vs.VideoNode] = core.resize.Bicubic
 ) -> vs.VideoNode:
     """
     Automatically fixes chroma shifts, at the very least by approximation.
