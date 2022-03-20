@@ -85,10 +85,11 @@ def finedehalo_mask(clip: vs.VideoNode, thresh: int = 24320, *,
     """
     Dehalo mask based on :py:meth:`fineline_mask` for protecting small things.
 
-    A masking function designed to protect textures and very thin linework when
-    and very fine detail like textures when performing more aggressive forms
+    A masking function designed to protect textures and very thin linework
+    and very fine detail, like textures, when performing more aggressive forms
     of filtering. Fairly large values are required for the threshold because
-    all internal processing is done in 16 bit.
+    all internal processing is done in 16 bit. If threshold values are in the
+    8-bit range, they will be adjusted to 16-bit values.
     The returned mask is the same depth as the input ``clip``.
 
     :param clip:        The clip to generate the mask for.
@@ -113,6 +114,7 @@ def finedehalo_mask(clip: vs.VideoNode, thresh: int = 24320, *,
         return core.std.Expr([dhm2, dhinner], "x y -").std.Binarize(threshold=thr)
 
     dither = False
+    thresh = (thresh << 8) - 1 if 1 <= thresh < 256 else thresh
 
     depth_in = clip.format.bits_per_sample
     if not depth_in == 16:
