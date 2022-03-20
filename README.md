@@ -22,7 +22,7 @@ import rvsfunc as INOX # Dutch people will get the joke
 import literally_any_other_func as laof
 ```
 
-# Deprecations
+# Changes
 
 Sometimes some bits and pieces get deprecated. This section lists what'll disappear soon.
 ```diff
