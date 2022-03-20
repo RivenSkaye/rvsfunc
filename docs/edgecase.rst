@@ -3,8 +3,6 @@
 Edgecase Functions
 ==================
 
-Aliases: ``rvsfunc.voodoo``, ``rvsfunc.cursed``
-
 .. autosummary::
    :nosignatures:
 
