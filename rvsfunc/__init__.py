@@ -22,6 +22,3 @@ batchindex = utils.batch_index
 znedi3 = NNEDI3.ZNEDI3
 nnedi3 = NNEDI3.NNEDI3
 nnedi3cl = NNEDI3.NNEDI3CL
-
-# aliases for shits and giggles
-voodoo = edgecase
