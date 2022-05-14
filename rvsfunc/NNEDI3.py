@@ -9,7 +9,6 @@ in a central place, as well as modernizing them.
 
 
 from .errors import VariableFormatError
-from .utils import is_topleft
 from abc import ABCMeta, abstractmethod
 from typing import Any, Type, TypeVar
 import vsutil
@@ -43,8 +42,7 @@ class NNEDI3Base(metaclass=ABCMeta):
         self.kwargs = nnedi_kwargs
 
     @abstractmethod
-    def nnedi(self, clip: vs.VideoNode, field: int,
-              *args: Any, **kwargs: Any) -> vs.VideoNode:
+    def nnedi(self, clip: vs.VideoNode, field: int, **kwargs: Any) -> vs.VideoNode:
         """
         A simple wrapper function for calling a NNEDI3 implementation.
 
@@ -76,9 +74,9 @@ class NNEDI3Base(metaclass=ABCMeta):
         """
 
         # The amount of iterations has to be at least 1 and no more than 10.
-        if not 1 <= iterations <= 10:
+        if not 1 <= iterations <= 11:
             raise ValueError("The amount of iterations for rpow2 may not "
-                             "be lower than 1 or higher than 9")
+                             "be lower than 1 or higher than 10")
 
         if not clip.format:
             raise VariableFormatError("rpow2")
@@ -88,11 +86,9 @@ class NNEDI3Base(metaclass=ABCMeta):
             planes = [clip]
         else:
             amnt = 3 if chroma else 1
-            tl = is_topleft(clip) if chroma else False
             planes = vsutil.split(clip)[:amnt]
 
         powd = []
-        planenum = 0
 
         for plane in planes:
             plane_iters = iterations
@@ -102,22 +98,16 @@ class NNEDI3Base(metaclass=ABCMeta):
                 # Which is how luma and gray are aligned and should be handled
                 plane = self.nnedi(plane, 0, **self.kwargs).std.Transpose()
                 plane = self.nnedi(plane, 0, **self.kwargs).std.Transpose()
+                if self.shift:
+                    plane = plane.resize.Bicubic(src_left=0.5, src_top=0.5)
                 plane_iters -= 1
 
-            if self.shift and planenum > 0:
-                sh = clip.format.subsampling_h not in [0, 2] and tl
-                sw = clip.format.subsampling_w not in [0, 2]
-                shift = 0.25 - (0.25 * (clip.width / planes[0].width))
-                plane = plane.resize.Spline36(src_left=shift if sw else 0.0,
-                                              src_top=shift if sh else 0.0)
             powd.append(plane)
-            planenum += 1
 
         if not chroma or len(powd) == 1:
             return powd[0]
         else:
-            return core.std.ShufflePlanes(clips=powd, planes=[0, 0, 0],
-                                          colorfamily=clip.format.color_family)
+            return vsutil.join(powd, family=clip.format.color_family)
 
     @classmethod
     def rpow2(cls: Type[NB], clip: vs.VideoNode, chroma: bool = True,
@@ -151,13 +141,13 @@ class ZNEDI3(NNEDI3Base):
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
-    def nnedi(self, clip: vs.VideoNode, field: int,
-              *args: Any, **kwargs: Any) -> vs.VideoNode:
+    def nnedi(self, clip: vs.VideoNode, field: int, **kwargs: Any) -> vs.VideoNode:
         nnkw = {
             "dh": True,
             "planes": 0,
             "nsize": 0,
             "nns": 3,
+            "qual": 2,
             "opt": True
         }
         nnkw.update(self.kwargs)
@@ -173,13 +163,13 @@ class NNEDI3(NNEDI3Base):
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
-    def nnedi(self, clip: vs.VideoNode, field: int,
-              *args: Any, **kwargs: Any) -> vs.VideoNode:
+    def nnedi(self, clip: vs.VideoNode, field: int, **kwargs: Any) -> vs.VideoNode:
         nnkw = {
             "dh": True,
             "planes": 0,
             "nsize": 0,
             "nns": 3,
+            "qual": 2,
             "opt": True
         }
         nnkw.update(self.kwargs)
@@ -195,14 +185,14 @@ class NNEDI3CL(NNEDI3Base):
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
-    def nnedi(self, clip: vs.VideoNode, field: int,
-              *args: Any, **kwargs: Any) -> vs.VideoNode:
+    def nnedi(self, clip: vs.VideoNode, field: int, **kwargs: Any) -> vs.VideoNode:
         nnkw = {
             "dh": True,
             "dw": False,
             "planes": 0,
             "nsize": 0,
             "nns": 3,
+            "qual": 2,
             "opt": True
         }
         nnkw.update(self.kwargs)
