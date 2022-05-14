@@ -1,6 +1,4 @@
 # IDE files #
-*.komodoproject
-.komodotools/
 *.code-workspace
 .vscode/
 
