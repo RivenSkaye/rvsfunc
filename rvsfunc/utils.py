@@ -8,12 +8,13 @@ project setup stuff. This should spawn some ease of use functions that I think
 are missing from the well known collections like ``vsutil``.
 """
 
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+
 import numpy as np
 import vapoursynth as vs
-from .masking import detail_mask
-from .errors import VariableFormatError
-from typing import Union, Optional, Callable, Any, List, Dict
 
+from .errors import VariableFormatError, VariableResolutionError
+from .masking import detail_mask
 
 core = vs.core
 vs_api_below4: Optional[bool] = None
@@ -93,6 +94,72 @@ def batch_index(
         raise
 
     return [] if not show_list else sauces
+
+
+def replace(
+    clip_a: vs.VideoNode, clip_b: vs.VideoNode, range: Sequence[int],
+    mismatch: bool = False
+) -> vs.VideoNode:
+    """
+    A simple and probably underoptimized RFS implementation, because why not.
+
+    :param clip_a:      The clip to replace frames in.
+    :param clip_b:      The clip to replace frames from `clip_a` with.
+    :param range:       A sequence containing exactly 2 ints. Any more will be
+                        ignored without warning. User error is not my problem.
+    :param mismatch:    A bool whether or not to allow splicing variable
+                        resolutions or formats together.
+    """
+    if (
+        not clip_a.format
+        or not clip_b.format
+        or clip_a.format != clip_b.format
+    ):
+        raise VariableFormatError("replace / rfs")
+
+    if not mismatch and (
+            not clip_a.width or not clip_b.width
+            or not clip_a.height or not clip_b.height
+            or clip_a.width != clip_b.width
+            or clip_a.height != clip_b.height
+    ):
+        raise VariableResolutionError("replace / rfs")
+
+    ra = range[0]
+    rb = range[1]
+    if ra > rb:
+        raise ValueError("replace / rfs: The start can't be after the end!")
+
+    clips = [clip_a[:ra], clip_b[ra:rb]]
+    if rb < (clip_a.num_frames - 1):
+        clips.append(clip_a[rb:])
+
+    return core.std.Splice(clips, mismatch=mismatch)
+
+
+def replace_ranges(
+    clip_a: vs.VideoNode, clip_b: vs.VideoNode,
+    ranges: Union[Sequence[Sequence[int]], Sequence[int]],
+    mismatch: bool = False
+) -> vs.VideoNode:
+    """
+    Replace frames in bulk, mostly useful for scenefiltering.
+
+    :param clip_a:      The clip to replace frames in.
+    :param clip_b:      The clip to replace frames from `clip_a` with.
+    :param ranges:      Either a ``Sequence`` of `int`s, or a ``Sequence`` of
+                        ``Sequence``s of ints. Ranges to replace.
+    :param mismatch:    Whether or not to allow mismatched formats and resolutions.
+    """
+    if isinstance(ranges, Sequence):
+        if isinstance(ranges[0], int) and isinstance(ranges[1], int):
+            return replace(clip_a, clip_b, (ranges[0], ranges[1]), mismatch)
+
+    for range in ranges:
+        assert isinstance(range, Sequence)
+        clip_a = replace(clip_a, clip_b, range, mismatch)
+
+    return clip_a
 
 
 def nc_splice(
