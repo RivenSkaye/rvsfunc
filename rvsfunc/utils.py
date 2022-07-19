@@ -150,7 +150,7 @@ def replace_ranges(
     :param ranges:      Either a ``Sequence`` of `int`s, or a ``Sequence`` of
                         ``Sequence``s of ints. Ranges to replace.
     :param mismatch:    Whether or not to allow mismatched formats and resolutions.
-    """
+    """  # noqa: RST214
     if isinstance(ranges, Sequence):
         if isinstance(ranges[0], int) and isinstance(ranges[1], int):
             return replace(clip_a, clip_b, (ranges[0], ranges[1]), mismatch)
