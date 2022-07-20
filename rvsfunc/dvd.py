@@ -9,16 +9,20 @@ by several subcontractors. They're generally a pain in the ass and this
 module exists to alleviate some of that pain.
 """
 
-import numpy as np
 from math import floor
+from typing import Any, Callable, Dict
+
+import numpy as np
 import vapoursynth as vs
-from .utils import frame_to_array
-from .masking import eoe_convolution
+
 from .errors import VariableFormatError, YUVError
-from typing import Callable, Dict, Any
+from .masking import eoe_convolution
+from .utils import frame_to_array
 
 
 core = vs.core
+
+__all__ = ["chromashifter"]
 
 
 def chromashifter(

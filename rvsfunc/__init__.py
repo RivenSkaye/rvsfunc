@@ -13,7 +13,7 @@ You're also more than welcome to create an issue on GitHub,
 `or make a PR <https://github.com/RivenSkaye/rvsfunc/blob/master/CONTRIBUTING.md>`_!
 """
 
-from . import utils, masking, dvd, edgecase, NNEDI3
+from . import NNEDI3, dvd, edgecase, errors, masking, utils
 
 # Alias for script compatibility
 batchindex = utils.batch_index

@@ -9,8 +9,13 @@ function raising the error unless stated otherwise.
 """
 
 from typing import Optional
+
 import vapoursynth as vs
+
+
 core = vs.core
+
+__all__ = ["VariableFormatError", "VariableResolutionError", "YUVError"]
 
 
 class VariableFormatError(TypeError):

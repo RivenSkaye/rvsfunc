@@ -7,15 +7,22 @@ expect some stuff to get added and removed infrequently and a fair few commits
 that state something along the lines of me complaining about broken code.
 """
 
-import vapoursynth as vs
-from .errors import VariableFormatError
+from functools import partial
 from math import floor
 from typing import Callable, Optional
-from vsutil import depth, get_y, iterate, split, join
-from functools import partial
+
+import vapoursynth as vs
+from vsutil import depth, get_y, iterate, join, split
+
+from .errors import VariableFormatError
 
 
 core = vs.core
+
+__all__ = [
+    "scradit_mask", "detail_mask", "finedehalo_mask", "dehalo_mask",
+    "fineline_mask", "eoe_convolution"
+]
 
 
 def scradit_mask(

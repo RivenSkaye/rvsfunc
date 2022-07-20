@@ -16,8 +16,14 @@ import vapoursynth as vs
 from .errors import VariableFormatError, VariableResolutionError
 from .masking import detail_mask
 
+
 core = vs.core
 vs_api_below4: Optional[bool] = None
+
+__all__ = [
+    "vs_api_below4", "is_topleft", "batch_index", "replace", "replace_ranges",
+    "nc_splice", "copy_credits", "frame_to_array"
+]
 
 
 def is_topleft(clip: vs.VideoNode) -> bool:

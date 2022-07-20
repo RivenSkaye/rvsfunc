@@ -6,15 +6,19 @@ need them again. Currently only holds `questionable_rescale` which I mangled
 from someone else's code that had a very similar edgecase.
 """
 
+from typing import Any, Callable, Dict, Optional
+
 import vapoursynth as vs
+from vsutil import depth, get_depth, get_w, get_y
+
+from .errors import VariableFormatError, VariableResolutionError
 from .masking import detail_mask
 from .NNEDI3 import ZNEDI3
-from .errors import VariableFormatError, VariableResolutionError
-from typing import Any, Dict, Callable, Optional
-from vsutil import depth, get_depth, get_w, get_y
 
 
 core = vs.core
+
+__all__ = ["chunked_filter", "questionable_rescale"]
 
 _Descaler = Callable[[vs.VideoNode, int, int, Any, Any, Any], vs.VideoNode]
 _Scaler = Callable[[vs.VideoNode, int, int, Any], vs.VideoNode]
