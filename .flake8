@@ -49,10 +49,16 @@ inline-quotes = double
 noqa-require-code = True
 noqa-include-name = True
 rst-roles =
-    mod,
-    py:mod,
-    func,
+    py:attr,
+    py:class,
     py:func,
+    py:meth,
+    py:mod,
+    py:ref,
+    attr,
+    class,
+    func,
     meth,
-    py:meth
+    mod,
+    ref
 
