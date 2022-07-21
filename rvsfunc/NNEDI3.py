@@ -135,7 +135,7 @@ class NNEDI3Base(metaclass=ABCMeta):
         :param shift:           Whether or not to fix the chroma shift caused by
                                 upsampling video.
         :param nnedi_kwargs:    Additional kwargs to pass to NNEDI3.
-                                See the ``nnedi`` function for more information.
+                                See :py:meth:`nnedi` for more information.
         """
         nn = cls(shift=shift, **nnedi_kwargs)
         return nn.double_size(clip, chroma, iterations)

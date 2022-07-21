@@ -90,7 +90,7 @@ def detail_mask(
 def finedehalo_mask(clip: vs.VideoNode, thresh: int = 24320, *,
                     chroma: bool = False) -> vs.VideoNode:
     """
-    Dehalo mask based on :py:meth:`fineline_mask` for protecting small things.
+    Dehalo mask based on :py:func:`fineline_mask` for protecting small things.
 
     A masking function designed to protect textures and very thin linework
     and very fine detail, like textures, when performing more aggressive forms
@@ -100,7 +100,7 @@ def finedehalo_mask(clip: vs.VideoNode, thresh: int = 24320, *,
     The returned mask is the same depth as the input ``clip``.
 
     :param clip:        The clip to generate the mask for.
-    :param thresh:      The threshold value used for :py:meth:`fineline_mask`.
+    :param thresh:      The threshold value used for :py:func:`fineline_mask`.
                         Don't forget to scale the value for 16-bit video.
     :param chroma:      Whether or not to mask chroma.
     """
@@ -160,7 +160,7 @@ def dehalo_mask(
     :param iter_out:    Amount of times to iterate expansion for the outer mask
                         Defaults to 2, the standard size
     :param iter_in:     Amount of times to iterate impansion for the inner mask
-                        Defaults to ``iter_out+1``.
+                        Defaults to ``iter_out + 1``.
     :param inner:       Returns the inner mask for checking.
     :param outer:       Returns the outer mask for checking.
     """

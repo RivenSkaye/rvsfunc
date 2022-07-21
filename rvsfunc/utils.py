@@ -175,7 +175,7 @@ def copy_credits(
     """
     Copy credits from source to the nc using a mask.
 
-    This function internally calls :py:func:``.masking.detail_mask`` which is
+    This function internally calls :py:func:`.masking.detail_mask` which is
     meant for descales. As such, it assumes the NC doesn't have major
     differences with the source as they are provided.
     Assumes both inputs have the same length.
