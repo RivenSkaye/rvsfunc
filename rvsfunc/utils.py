@@ -5,7 +5,7 @@ The functions in this module are mostly things that don't fit in with the
 other categories but aren't really worth making a new module over.
 This module will end up mostly containing things like batch utilities and
 project setup stuff. This should spawn some ease of use functions that I think
-are missing from the well known collections like `vsutil`.
+are missing from the well known collections like ``vsutil``.
 """
 
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
@@ -75,7 +75,7 @@ def batch_index(
                             doesn't write, make sure to get the list of indexes
                             using show_list.
     :param show_list:       If this is set to True, this function returns the
-                            results of `source_filter(path)` for every path in
+                            results of ``source_filter(path)`` for every path in
                             paths. Might be useful for batches as well as it
                             would just return every ``vs.VideoNode`` returned by
                             the calls to source_filter.
@@ -110,7 +110,7 @@ def replace(
     A simple and probably underoptimized RFS implementation, because why not.
 
     :param clip_a:      The clip to replace frames in.
-    :param clip_b:      The clip to replace frames from `clip_a` with.
+    :param clip_b:      The clip to replace frames from ``clip_a`` with.
     :param range:       A sequence containing exactly 2 ints. Any more will be
                         ignored without warning. User error is not my problem.
     :param mismatch:    A bool whether or not to allow splicing variable
@@ -152,9 +152,9 @@ def replace_ranges(
     Replace frames in bulk, mostly useful for scenefiltering.
 
     :param clip_a:      The clip to replace frames in.
-    :param clip_b:      The clip to replace frames from `clip_a` with.
-    :param ranges:      Either a `Sequence` of `int`, or a `Sequence` of
-                        `Sequence` of `int`. Ranges to replace.
+    :param clip_b:      The clip to replace frames from ``clip_a`` with.
+    :param ranges:      Either a ``Sequence`` of ``int``, or a ``Sequence`` of
+                        ``Sequence`` of ``int``. Ranges to replace.
     :param mismatch:    Whether or not to allow mismatched formats and resolutions.
     """
     if isinstance(ranges, Sequence):
@@ -175,7 +175,7 @@ def copy_credits(
     """
     Copy credits from source to the nc using a mask.
 
-    This function internally calls :py:func:`.masking.detail_mask` which is
+    This function internally calls :py:func:``.masking.detail_mask`` which is
     meant for descales. As such, it assumes the NC doesn't have major
     differences with the source as they are provided.
     Assumes both inputs have the same length.
