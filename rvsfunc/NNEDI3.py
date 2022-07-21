@@ -9,7 +9,7 @@ in a central place, as well as modernizing them.
 
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Type, TypeVar
+from typing import Any, List, Type, TypeVar
 
 import vapoursynth as vs
 import vsutil
@@ -95,7 +95,7 @@ class NNEDI3Base(metaclass=ABCMeta):
             amnt = 3 if chroma else 1
             planes = vsutil.split(clip)[:amnt]
 
-        powd = []
+        powd: List[vs.VideoNode] = []
 
         for plane in planes:
             plane_iters = iterations
@@ -103,10 +103,23 @@ class NNEDI3Base(metaclass=ABCMeta):
                 # No fuckery with field since we're splitting planes
                 # Always use field 0 to keep center alignment
                 # Which is how luma and gray are aligned and should be handled
-                plane = self.nnedi(plane, 0, **self.kwargs).std.Transpose()
-                plane = self.nnedi(plane, 0, **self.kwargs).std.Transpose()
-                if self.shift:
-                    plane = plane.resize.Bicubic(src_left=0.5, src_top=0.5)
+                plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
+                plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
+                # If we're fixing the chroma shift, make sure luma was processed
+                if self.shift and len(powd) > 0:
+                    plane = plane.resize.Bicubic(
+                        # Apply the chroma shift formula:
+                        # 0.25 - (0.25 * (src.width / dst.width))
+                        # = 0.25 - (0.25 * 0.5) = 0.25 - 0.125 = 0.125
+                        # And the NNEDI doubling shift is 0.5 - field
+                        # Y: shift + 0 = shift
+                        # U & V: shift + 0.125 -> -0.5 + 0.125 = -0.375
+                        src_left=-0.375, src_top=-0.5
+                    )
+                else:
+                    # If we're not fixing chroma shifts (RGB, single plane, etc)
+                    # We'll still have to account for the NNEDI shift.
+                    plane = plane.resize.Bicubic(src_left=-0.5, src_top=-0.5)
                 plane_iters -= 1
 
             powd.append(plane)
