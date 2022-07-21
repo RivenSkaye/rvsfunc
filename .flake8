@@ -38,7 +38,7 @@ extend-select =
     # rst docstrings formatting checker
     RST,
     # This is a blessing for Sphinx specifically
-    SXL001,
+    SXL,
     # Typing collections. This is mostly for readability of code.
     TYCO1
 extend-ignore =
