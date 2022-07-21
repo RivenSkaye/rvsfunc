@@ -5,7 +5,7 @@ The functions in this module are mostly things that don't fit in with the
 other categories but aren't really worth making a new module over.
 This module will end up mostly containing things like batch utilities and
 project setup stuff. This should spawn some ease of use functions that I think
-are missing from the well known collections like ``vsutil``.
+are missing from the well known collections like `vsutil`.
 """
 
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
@@ -22,7 +22,7 @@ vs_api_below4: Optional[bool] = None
 
 __all__ = [
     "vs_api_below4", "is_topleft", "batch_index", "replace", "replace_ranges",
-    "nc_splice", "copy_credits", "frame_to_array"
+    "copy_credits", "frame_to_array"
 ]
 
 
@@ -75,7 +75,7 @@ def batch_index(
                             doesn't write, make sure to get the list of indexes
                             using show_list.
     :param show_list:       If this is set to True, this function returns the
-                            results of ``source_filter(path)`` for every path in
+                            results of `source_filter(path)` for every path in
                             paths. Might be useful for batches as well as it
                             would just return every ``vs.VideoNode`` returned by
                             the calls to source_filter.
@@ -153,10 +153,10 @@ def replace_ranges(
 
     :param clip_a:      The clip to replace frames in.
     :param clip_b:      The clip to replace frames from `clip_a` with.
-    :param ranges:      Either a ``Sequence`` of `int`s, or a ``Sequence`` of
-                        ``Sequence``s of ints. Ranges to replace.
+    :param ranges:      Either a `Sequence` of `int`, or a `Sequence` of
+                        `Sequence` of `int`. Ranges to replace.
     :param mismatch:    Whether or not to allow mismatched formats and resolutions.
-    """  # noqa: RST214
+    """
     if isinstance(ranges, Sequence):
         if isinstance(ranges[0], int) and isinstance(ranges[1], int):
             return replace(clip_a, clip_b, (ranges[0], ranges[1]), mismatch)
@@ -166,48 +166,6 @@ def replace_ranges(
         clip_a = replace(clip_a, clip_b, range, mismatch)
 
     return clip_a
-
-
-def nc_splice(
-    source: vs.VideoNode, nc: vs.VideoNode, startframe: int,
-    endframe: int,
-    nc_filterfunc: Optional[Callable[[vs.VideoNode, Any], vs.VideoNode]] = None,
-    use_internal: bool = False, ext_mask: Optional[vs.VideoNode] = None,
-    **kwargs: Dict[str, Any]
-) -> vs.VideoNode:
-    """
-    Function for splicing in video from a different source.
-
-    The intended purpose is to splice NCs into an episode when they look better
-    or when they're easier to filter. Allows for copying over the credits.
-
-    :param source:          The source clip that needs something replaced
-    :param nc:              The clip that needs to be spliced into source
-    :param startframe:      The frame to start splicing at. This is an inclusive
-                            selection value.
-                            The selected range is ``source[:startframe]``.
-    :param endframe:        The first frame that needs to be kept. This is an
-                            inclusive selection value.
-                            Selected as ``source[endframe+1:]``.
-    :param nc_filterfunc:   Optional function to call on the input video for
-                            filtering before splicing it in.
-    :param use_internal:    Whether or not to use ``copy_credits`` from this
-                            Module. Mutually exclusive with ``nc_filterfunc``.
-    :param ext_mask:        For when the internal merging is good enough
-                            but the mask it generates isn't.
-                            This is only used if ``use_internal`` applies.
-    :param kwargs:          Additional keyword args are only expanded when
-                            using an external ``filterfunc``. These are the
-                            keyword arguments to pass to it, not required if
-                            the filterfunc is a ``partial``.
-    """
-
-    if nc_filterfunc:
-        nc = nc_filterfunc(nc, **kwargs)  # type: ignore
-    elif use_internal:
-        nc = copy_credits(source[startframe:endframe + 1], nc, ext_mask)
-
-    return source[:startframe] + nc + source[endframe + 1:]
 
 
 def copy_credits(
