@@ -202,41 +202,73 @@ def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
 
 def pad_to(
     clip: vs.VideoNode, width: int = 1920, height: int = 1080,
-    color: Sequence[int] = (0, 128, 128)
+    color: Union[Sequence[int], int, None] = None, *,
+    range_in: vsutil.Range = vsutil.Range.LIMITED,
+    range_out: Optional[vsutil.Range] = None,
+    chroma: bool = False
 ) -> vs.VideoNode:
     """
     Pad a clip with the specified color to the specified dimensions.
 
-    :param clip:    The clip to pad
-    :param width:   The width to pad to, defaults to 1920
-    :param height:  The height to pad to, defaults to 1080
-    :param color:   A ``Sequence`` describing the color to use for padding,
-                    in 8-bit values (a triplet of 0-255 values) or in
-                    float ranges. Defaults to black.
-    """
+    :param clip:        The clip to pad
+    :param width:       The width to pad to, defaults to 1920
+    :param height:      The height to pad to, defaults to 1080
+    :param color:       A ``Sequence`` describing the color to use for padding,
+                        in 8-bit values (a triplet of 0-255 values) or a single int
+                        for single-plane formats. Defaults to YUV black
+    :param range_in:    The range for the video, either limited or full, defined in
+                        `vsutil.Range <http://vsutil.encode.moe/en/latest/api.html#vsutil.Range>`_
+                        and defaults to ``Range.LIMITED`` for integer format clips.
+    :param range_out:   Optional output range, defaults to ``range_in`` if not given.
+    :param chroma:      Only used with single plane clips, force processing as chroma
+                        to ensure values stay within the valid ranges.
+    """  # noqa: W505, E501  # Silence line too long and doc line too long.
     if not clip.width or not clip.height:
         raise VariableResolutionError("pad_to")
-    if clip.width == width and clip.height == height:
+    if clip.width >= width and clip.height >= height:
         return clip
     if not clip.format:
         raise VariableFormatError("pad_to")
+    elif clip.format.num_planes == 1 and color is None:
+        color = 128 if chroma else 0
+        range_out = range_out or range_in
+        range_in = vsutil.Range.FULL
+    else:
+        if color is None:
+            yuv = (0, 128, 128)
+            rgb = (0, 0, 0)
+            color = yuv if clip.format.color_family is vs.YUV else rgb
+        range_out = range_out or range_in
 
+    if (isinstance(color, int)):
+        color = (color, )
     colorcount = len(color)
-    if colorcount > 3:
-        raise ValueError("pad_to: color must be between 1 and 3 values long!")
-    elif colorcount < 1:
-        color = (0, 128, 128)
+    if colorcount != clip.format.num_planes:
+        raise ValueError("pad_to: color must have a value for every plane!")
 
     target_depth = vsutil.get_depth(clip)
     colorval: List[Union[int, float]] = []
+    scale = range_in != range_out
     for plane in color:
+        is_chroma = len(colorval) > 0 if not chroma else chroma
         if target_depth == 8:
             colorval.append(plane)
+        elif clip.format.sample_type == vs.INTEGER:
+            colorval.append(
+                vsutil.scale_value(
+                    value=plane, input_depth=8, output_depth=target_depth,
+                    range_in=range_in, range=range_out,
+                    scale_offsets=scale,
+                    chroma=is_chroma)
+            )
         else:
-            if clip.format.sample_type == vs.INTEGER:
-                colorval.append(vsutil.scale_value(plane, 8, target_depth))
-            else:
-                colorval.append(vsutil.scale_value(plane, 8, 32))
+            colorval.append(
+                vsutil.scale_value(
+                    value=plane, input_depth=8, output_depth=32,
+                    range_in=range_in, range=range_out,
+                    scale_offsets=scale,
+                    chroma=is_chroma)
+            )
 
     lpad = rpad = tpad = bpad = 0
     hpad = width - clip.width
@@ -257,5 +289,5 @@ def pad_to(
 
     return clip.std.AddBorders(
         left=lpad, right=rpad, top=tpad, bottom=bpad,
-        color=color if len(color) > 1 else color[0]
+        color=colorval if len(colorval) > 1 else colorval[0]
     )
