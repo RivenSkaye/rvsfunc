@@ -246,12 +246,12 @@ def pad_to(
         range_out = range_out or range_in
         range_in = vsutil.Range.FULL
     else:
+        range_out = range_out or range_in
         if color is None:
             yuv = (0, 128, 128)
             rgb = (0, 0, 0)
             color = yuv if clip.format.color_family is vs.YUV else rgb
-        range_out = range_out or range_in
-        range_in = vsutil.Range.FULL
+            range_in = vsutil.Range.FULL
 
     if (isinstance(color, int)):
         color = (color, )
