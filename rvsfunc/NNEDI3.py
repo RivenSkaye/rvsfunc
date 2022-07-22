@@ -133,7 +133,10 @@ class NNEDI3Base(metaclass=ABCMeta):
         """
         nnedi3_rpow2 as a classmethod for easy use.
 
-        **THIS FUNCTION IS NOT API-COMPATIBLE WITH 4re's ``nnedi3_rpow2``!**
+        **This function NOT a drop-in replacement for
+        `4re's <https://gist.github.com/4re/342624c9e1a144a696c6>`_ script**
+        ``nnedi3_rpow2`` **as it is not API-compatible!**
+
         Having gotten that out of the way, the function signature is heavily
         simplified compared to the old one and so is the ``iterations`` argument
         that replaces the old ``rfactor``.
