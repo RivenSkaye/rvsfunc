@@ -19,7 +19,7 @@ from .masking import detail_mask
 
 
 core = vs.core
-vs_api_below4: bool = False
+VS_API_BELOW_4: bool = False
 """
 A boolean constant that provides some info on the VapourSynth API version.
 
@@ -29,12 +29,12 @@ makes for a good example of when to use this.
 """
 
 try:
-    vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore [attr-defined]
+    VS_API_BELOW_4 = vs.__api_version__.api_major < 4  # type: ignore [attr-defined]
 except BaseException:
     pass
 
 __all__ = [
-    "vs_api_below4", "is_topleft", "batch_index", "replace", "replace_ranges",
+    "VS_API_BELOW_4", "is_topleft", "batch_index", "replace", "replace_ranges",
     "copy_credits", "frame_to_array", "pad_to"
 ]
 
@@ -209,7 +209,7 @@ def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
     """
     return np.dstack([
         f.get_read_array(p) for p in range(f.format.num_planes)  # type: ignore
-    ] if vs_api_below4 else f)
+    ] if VS_API_BELOW_4 else f)
 
 
 def pad_to(
