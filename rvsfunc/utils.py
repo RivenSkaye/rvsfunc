@@ -19,7 +19,7 @@ from .masking import detail_mask
 
 
 core = vs.core
-vs_api_below4: Optional[bool] = None
+vs_api_below4: bool = vs.__api_version__.api_major < 4  # type: ignore [attr-defined]
 
 __all__ = [
     "vs_api_below4", "is_topleft", "batch_index", "replace", "replace_ranges",
@@ -195,9 +195,6 @@ def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
     """
     Simple wrapper to turn a video frame into an numpy array
     """
-    global vs_api_below4
-    if vs_api_below4 is None:
-        vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore
     return np.dstack([
         f.get_read_array(p) for p in range(f.format.num_planes)  # type: ignore
     ] if vs_api_below4 else f)
