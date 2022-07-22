@@ -99,29 +99,26 @@ class NNEDI3Base(metaclass=ABCMeta):
 
         for plane in planes:
             plane_iters = iterations
+            src_left = 0.0
+            src_top = 0.0
             while plane_iters > 0:
-                # No fuckery with field since we're splitting planes
-                # Always use field 0 to keep center alignment
-                # Which is how luma and gray are aligned and should be handled
+                sx = sy = 0.0
+                # Setting field=1 ends up with a smaller shift
                 plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
                 plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
-                # If we're fixing the chroma shift, make sure luma was processed
-                if self.shift and len(powd) > 0:
-                    plane = plane.resize.Bicubic(
-                        # Apply the chroma shift formula:
-                        # 0.25 - (0.25 * (src.width / dst.width))
-                        # = 0.25 - (0.25 * 0.5) = 0.25 - 0.125 = 0.125
-                        # And the NNEDI doubling shift is 0.5 - field
-                        # Y: shift + 0 = shift
-                        # U & V: shift + 0.125 -> -0.5 + 0.125 = -0.375
-                        src_left=-0.375, src_top=-0.5
-                    )
-                else:
-                    # If we're not fixing chroma shifts (RGB, single plane, etc)
-                    # We'll still have to account for the NNEDI shift.
-                    plane = plane.resize.Bicubic(src_left=-0.5, src_top=-0.5)
+                # Apply chroma shift only if wanted AND needed
+                # Apply the chroma shift formula:
+                # 0.25 - (0.25 * (src.width / dst.width)) = 0.25 - (0.25 * 0.5)
+                # = 0.25 - 0.125 = 0.125 and the NNEDI doubling shift is 0.5 - field
+                # Y: shift + 0 = shift
+                # U & V: shift + 0.125 -> -0.5 + 0.125 = -0.375
+                sx = -0.375 if self.shift and len(powd) > 0 else -0.5
+                sy = -0.5
+                src_left += src_left + sx
+                src_top += src_top + sy
                 plane_iters -= 1
 
+            plane = plane.resize.Bicubic(src_left=src_left, src_top=src_top)
             powd.append(plane)
 
         if not chroma or len(powd) == 1:
@@ -212,8 +209,7 @@ class NNEDI3CL(NNEDI3Base):
             "planes": 0,
             "nsize": 0,
             "nns": 3,
-            "qual": 2,
-            "opt": True
+            "qual": 2
         }
         nnkw.update(self.kwargs)
         nnkw.update(kwargs)
