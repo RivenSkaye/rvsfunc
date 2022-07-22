@@ -238,8 +238,7 @@ def pad_to(
             else:
                 colorval.append(vsutil.scale_value(plane, 8, 32))
 
-    lpad: int = 0
-    rpad: int = 0
+    lpad = rpad = tpad = bpad = 0
     hpad = width - clip.width
     if hpad > 0:
         if hpad % 2 == 1:
