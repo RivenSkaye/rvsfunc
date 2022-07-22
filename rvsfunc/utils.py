@@ -20,6 +20,14 @@ from .masking import detail_mask
 
 core = vs.core
 vs_api_below4: bool = False
+"""
+A boolean constant that provides some info on the VapourSynth API version.
+
+This is to be used for situations where compatibility with version 3 is
+desired and there could be different calls to be made. :py:meth:`frame_to_array`
+makes for a good example of when to use this.
+"""
+
 try:
     vs_api_below4 = vs.__api_version__.api_major < 4  # type: ignore [attr-defined]
 except BaseException:
