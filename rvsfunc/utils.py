@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 import vapoursynth as vs
+import vsutil
 
 from .errors import VariableFormatError, VariableResolutionError
 from .masking import detail_mask
@@ -22,7 +23,7 @@ vs_api_below4: Optional[bool] = None
 
 __all__ = [
     "vs_api_below4", "is_topleft", "batch_index", "replace", "replace_ranges",
-    "copy_credits", "frame_to_array"
+    "copy_credits", "frame_to_array", "pad_to"
 ]
 
 
@@ -48,7 +49,7 @@ def is_topleft(clip: vs.VideoNode) -> bool:
     if cloc is not None:
         return cloc == 2
 
-    # If the primaties are set (they should be) then return if it's BT.2020
+    # If the primaries are set (they should be) then return if it's BT.2020
     prims = props.get("_Primaries")
     if prims not in [None, 2]:
         return prims == 9
@@ -200,3 +201,65 @@ def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
     return np.dstack([
         f.get_read_array(p) for p in range(f.format.num_planes)  # type: ignore
     ] if vs_api_below4 else f)
+
+
+def pad_to(
+    clip: vs.VideoNode, width: int = 1920, height: int = 1080,
+    color: Sequence[int] = (0, 128, 128)
+) -> vs.VideoNode:
+    """
+    Pad a clip with the specified color to the specified dimensions.
+
+    :param clip:    The clip to pad
+    :param width:   The width to pad to, defaults to 1920
+    :param height:  The height to pad to, defaults to 1080
+    :param color:   A ``Sequence`` describing the color to use for padding,
+                    in 8-bit values (a triplet of 0-255 values) or in
+                    float ranges. Defaults to black.
+    """
+    if not clip.width or not clip.height:
+        raise VariableResolutionError("pad_to")
+    if clip.width == width and clip.height == height:
+        return clip
+    if not clip.format:
+        raise VariableFormatError("pad_to")
+
+    colorcount = len(color)
+    if colorcount > 3:
+        raise ValueError("pad_to: color must be between 1 and 3 values long!")
+    elif colorcount < 1:
+        color = (0, 128, 128)
+
+    target_depth = vsutil.get_depth(clip)
+    colorval: List[Union[int, float]] = []
+    for plane in color:
+        if target_depth == 8:
+            colorval.append(plane)
+        else:
+            if clip.format.sample_type == vs.INTEGER:
+                colorval.append(vsutil.scale_value(plane, 8, target_depth))
+            else:
+                colorval.append(vsutil.scale_value(plane, 8, 32))
+
+    lpad: int = 0
+    rpad: int = 0
+    hpad = width - clip.width
+    if hpad > 0:
+        if hpad % 2 == 1:
+            lpad = int((hpad + 1) / 2)
+            rpad = int((hpad - 1) / 2)
+        else:
+            lpad = rpad = int(hpad / 2)
+
+    vpad = height - clip.height
+    if vpad > 0:
+        if vpad % 2 == 1:
+            tpad = int((vpad + 1) / 2)
+            bpad = int((vpad - 1) / 2)
+        else:
+            tpad = bpad = int(vpad / 2)
+
+    return clip.std.AddBorders(
+        left=lpad, right=rpad, top=tpad, bottom=bpad,
+        color=color if len(color) > 1 else color[0]
+    )

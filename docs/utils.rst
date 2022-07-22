@@ -11,6 +11,7 @@ Utility Functions
     rvsfunc.utils.frame_to_array
     rvsfunc.utils.is_topleft
     rvsfunc.utils.nc_splice
+    rvsfunc.utils.pad_to
     rvsfunc.utils.replace
     rvsfunc.utils.replace_ranges
 
