@@ -134,7 +134,7 @@ class NNEDI3Base(metaclass=ABCMeta):
         nnedi3_rpow2 as a classmethod for easy use.
 
         **This function NOT a drop-in replacement for 4re's**
-        `script of the same name <https://gist.github.com/4re/342624c9e1a144a696c6>`_
+        `nnedi3_rpow2 <https://gist.github.com/4re/342624c9e1a144a696c6>`_
 
         Having gotten that out of the way, the function signature is heavily
         simplified compared to the old one and so is the ``iterations`` argument
