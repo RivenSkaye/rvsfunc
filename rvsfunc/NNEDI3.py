@@ -99,8 +99,6 @@ class NNEDI3Base(metaclass=ABCMeta):
 
         for plane in planes:
             plane_iters = iterations
-            src_left = 0.0
-            src_top = 0.0
             while plane_iters > 0:
                 sx = sy = 0.0
                 # Setting field=1 ends up with a smaller shift
@@ -114,11 +112,9 @@ class NNEDI3Base(metaclass=ABCMeta):
                 # U & V: shift + 0.125 -> -0.5 + 0.125 = -0.375
                 sx = -0.375 if self.shift and len(powd) > 0 else -0.5
                 sy = -0.5
-                src_left += src_left + sx
-                src_top += src_top + sy
+                plane = plane.resize.Bicubic(src_left=sx, src_top=sy)
                 plane_iters -= 1
 
-            plane = plane.resize.Bicubic(src_left=src_left, src_top=src_top)
             powd.append(plane)
 
         if not chroma or len(powd) == 1:
