@@ -66,8 +66,12 @@ class NNEDI3Base(metaclass=ABCMeta):
         """
         ...
 
-    def double_size(self, clip: vs.VideoNode, chroma: bool = True,
-                    iterations: int = 1) -> vs.VideoNode:
+    def double_size(
+        self, clip: vs.VideoNode,
+        chroma: bool = True,
+        iterations: int = 1,
+        alternate: bool = False
+    ) -> vs.VideoNode:
         """
         nnedi3_rpow2, except not bad. This does the acual rpow2'ing.
 
@@ -100,10 +104,11 @@ class NNEDI3Base(metaclass=ABCMeta):
         for plane in planes:
             plane_iters = iterations
             while plane_iters > 0:
+                field = plane_iters % 2 if alternate else 1
                 sx = sy = 0.0
                 # Setting field=1 ends up with a smaller shift
-                plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
-                plane = self.nnedi(plane, 1, **self.kwargs).std.Transpose()
+                plane = self.nnedi(plane, field, **self.kwargs).std.Transpose()
+                plane = self.nnedi(plane, field, **self.kwargs).std.Transpose()
                 # Apply chroma shift only if wanted AND needed
                 # Apply the chroma shift formula:
                 # 0.25 - (0.25 * (src.width / dst.width)) = 0.25 - (0.25 * 0.5)
@@ -112,6 +117,9 @@ class NNEDI3Base(metaclass=ABCMeta):
                 # U & V: shift + 0.125 -> -0.5 + 0.125 = -0.375
                 sx = -0.375 if self.shift and len(powd) > 0 else -0.5
                 sy = -0.5
+                if alternate and field != 1:
+                    sx += 1
+                    sy += 1
                 plane = plane.resize.Bicubic(src_left=sx, src_top=sy)
                 plane_iters -= 1
 
@@ -124,7 +132,7 @@ class NNEDI3Base(metaclass=ABCMeta):
 
     @classmethod
     def rpow2(cls: Type[NB], clip: vs.VideoNode, chroma: bool = True,
-              iterations: int = 1, shift: bool = True,
+              iterations: int = 1, shift: bool = True, alternate: bool = False,
               **nnedi_kwargs: Any) -> vs.VideoNode:
         """
         nnedi3_rpow2 as a classmethod for easy use.
@@ -142,11 +150,17 @@ class NNEDI3Base(metaclass=ABCMeta):
                                 This is exponential growth (2x, 4x, 8x, ...)
         :param shift:           Whether or not to fix the chroma shift caused by
                                 upsampling video.
+        :param alternate:       Whether to prefer alternating the shift on every
+                                iteration of doubling. Only useful for
+                                ``iterations >= 2`` and entirely a preference thing.
+                                This *will* impact the output even when not fixing
+                                the normal chroma shift from supersampling, as the
+                                field interpolation shift is still compensated for.
         :param nnedi_kwargs:    Additional kwargs to pass to NNEDI3.
                                 See :py:meth:`nnedi` for more information.
         """
         nn = cls(shift=shift, **nnedi_kwargs)
-        return nn.double_size(clip, chroma, iterations)
+        return nn.double_size(clip, chroma, iterations, alternate)
 
 
 class ZNEDI3(NNEDI3Base):
@@ -161,9 +175,10 @@ class ZNEDI3(NNEDI3Base):
             "dh": True,
             "planes": 0,
             "nsize": 0,
-            "nns": 3,
+            "nns": 4,
             "qual": 2,
-            "opt": True
+            "opt": True,
+            "pscrn": 1
         }
         nnkw.update(self.kwargs)
         nnkw.update(kwargs)
@@ -183,9 +198,10 @@ class NNEDI3(NNEDI3Base):
             "dh": True,
             "planes": 0,
             "nsize": 0,
-            "nns": 3,
+            "nns": 4,
             "qual": 2,
-            "opt": True
+            "opt": True,
+            "pscrn": 1
         }
         nnkw.update(self.kwargs)
         nnkw.update(kwargs)
@@ -206,8 +222,9 @@ class NNEDI3CL(NNEDI3Base):
             "dw": False,
             "planes": 0,
             "nsize": 0,
-            "nns": 3,
-            "qual": 2
+            "nns": 4,
+            "qual": 2,
+            "pscrn": 1
         }
         nnkw.update(self.kwargs)
         nnkw.update(kwargs)
