@@ -14,16 +14,16 @@ Is your contribution related to an [open issue](https://github.com/RivenSkaye/rv
 Then please mention `fixes #<issue number>` in the PR title or description.
 Is it not there yet? Then please feel free to open one to prevent pouring time
 and effort into a PR that gets denied because the functionality is readily
-available elsewhere. _You can ignore this if you've contacted me elsewhere._
+available elsewhere. If you've contacted me elsewhere, an issue isn't required.
 
 ## Getting started
 
-Make sure your code is up to date with either master, this is to help prevent
+Make sure your code is up to date with master, this is to help prevent
 compatibility issues as no guarantees are made with regards to the API. Sure,
 I *try* to keep it backwards compatible, but I'm not afraid of breaking it
-if the need arises. People can always pin versions.
+if the need arises. People can always pin versions if they need to.
 
-Adjust the commands as you need, these assume bash and python 3.8 or 3.9:
+Adjust the commands as you need, these assume python 3.8 through 3.10:
 ```bash
 $ git clone https://github.com/RivenSkaye/rvsfunc
 $ python -m pip install -r ./rvsfunc/requirements-dev.txt
@@ -41,33 +41,34 @@ way I expect the type of change to be described.
 
 - Code and functionality, these change or add stuff to what people get when they `import rvsfunc`.
   - I expect these to include relevant changes and additions to documentation as well.
-  - Don't forget to add relevant `autodoc` directives and similar to `docs/index.rst`
+  - Don't forget to add relevant `autodoc` directives and similar to `docs/`
 - Workflow changes, whenever you wish to improve, add, or change a workflow.
   - These will have to be described in detail as automation comes with risks.
+  - GitHub CI can be kinda jank, so these may take some time to process.
 - Documentation changes, these cause changes to what people see in [the docs](https://rvsfunc.tae.moe/).
-  - These change the contents of `docs/` and/or the docstrings throughout rvsfunc.
+  - These change the contents of `docs/` and/or any docstrings throughout rvsfunc.
   - These also include changes to things like [the README](./README.md) or this document.
-  - You're free to change the error messages, but any other code changes go in the first point.
-  - If possible, use GitHub Pages to display a build of the docs.
+  - You're free to change messages shown to users, like errors.
+  - If possible, set up a hosted instance of doc changes on [RTD](https://readthedocs.org/) or GH Pages.
 
 For workflow and documentation changes, feel free to offer massive overhauls.
-For code changes, please try and keep API compatibility. _This includes alias memes._
+For code changes, please try and keep API compatibility. If a function is moved or renamed,
+alias it and update the diff in the README. If a function signature changes, try to use
+`typing.Optional` and/or sane defaults, or send a deprecation warning for any removed arguments.
 
-I'm very much willing to accept changes that help me split the docs to multiple
-pages. Say one per module in the package. As rvsfunc grows, I fear it will get
-much too big to be easily navigatable.
+I'm open to all kinds of changes to the project so long as I see a benefit to the change being made.
+As with most libraries, it's as opinionated as can be, but opinions might sway with discussion.
+The main goal is to provide useful _basic_ utilities that don't have a lot of dependencies.
 
 **Syntax and Typing**
 
 It's important that the workflows for the repository don't break, as well as
-that code formatting and typing is all in the way I like it to be.
-That means making sure you have Flake8 and the correct plugins running, as
-well as MyPy. They're all listed in the `requirements-dev.txt` files for your
-convenience and the configuration files are included in the repository.
-Make sure they pass all checks and all should be fine.
-
-If your changes include any modifications to existing Flake8 or MyPy rules,
-the PR will not be considered or reviewed until said changes are reverted.
+that code formatting and typing is in order.
+In order to do this, the workflows include Flake8 with some plugins and MyPy.
+These are all listed in `requirements-dev.txt` so you can run them on your local machine
+to ensure all is well before sending in a PR.
+If the Flake8 and MyPy configurations have to be edited for the code to pass, expect
+the PR to sit still while it's closely being reviewed.
 
 **Docs**
 
@@ -76,17 +77,13 @@ if you don't add new dependencies. But there are some things that can break
 Read The Docs building when you forget to list them in `docs/sphinx-requirements.txt`.
 To minimize the risk of docs breaking, I ask that you list any added dependencies
 that can break module or function imports in this file as well as that you
-confirm builds run without errors. You can check this by running:
+confirm builds run without errors. To verify this, either set up an RTD build,
+or check this by running Sphinx locally. If you do local builds, ensure your Python
+version matches what is configured for RTD to use in `readthedocs.yaml`
 ```bash
 $ cd ./rvsfunc/docs/
 $ make clean && make html
 ```
-If any errors or warnings pop up, please resolve them _before_ submitting the
-PR. This is not a hard requirement, however, as I will check this as well.
-
-## After you PR
-
-Assuming your PR was eventually merged, future PRs should go over a bit smoother.
-For one, GitHub should be running workflows over PRs of contributors, so that
-means Flake8 and MyPy checking are all being handled on their end. Should save
-you and me both a fair bit of effort.
+If any errors or warnings pop up, please resolve them _before_ submitting the PR,
+or mention it in the PR and turn on the option to allow maintainers to edit your fork.
+This allows me to try and help fix what's preventing the docs from building.
