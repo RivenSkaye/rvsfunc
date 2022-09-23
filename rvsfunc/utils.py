@@ -235,6 +235,7 @@ def pad_to(
     :param chroma:      Only used with single plane clips, force processing as chroma
                         to ensure values stay within the valid ranges.
     """  # noqa: W505, E501  # Silence line too long and doc line too long.
+    print(clip)
     if not clip.width or not clip.height:
         raise VariableResolutionError("pad_to")
     if clip.width >= width and clip.height >= height:
@@ -291,6 +292,9 @@ def pad_to(
             rpad = int((hpad - 1) / 2)
         else:
             lpad = rpad = int(hpad / 2)
+        if lpad % 2 == 1:
+            lpad -= 1
+            rpad += 1
 
     vpad = height - clip.height
     if vpad > 0:
@@ -299,6 +303,9 @@ def pad_to(
             bpad = int((vpad - 1) / 2)
         else:
             tpad = bpad = int(vpad / 2)
+        if tpad % 2 == 1:
+            tpad -= 1
+            bpad += 1
 
     return clip.std.AddBorders(
         left=lpad, right=rpad, top=tpad, bottom=bpad,
