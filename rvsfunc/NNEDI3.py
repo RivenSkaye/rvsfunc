@@ -115,7 +115,9 @@ class NNEDI3Base(metaclass=ABCMeta):
                 # = 0.25 - 0.125 = 0.125 and the NNEDI doubling shift is 0.5 - field
                 # Y: shift + 0 = shift
                 # U & V: shift + 0.125 -> -0.5 + 0.125 = -0.375
-                sx = -0.375 if self.shift and len(powd) > 0 else -0.5
+                # Correction from IEW: apparently it's 0.25
+                # NNEDI3 is weird, fuck that shit
+                sx = -0.25 if self.shift and len(powd) > 0 else -0.5
                 sy = -0.5
                 if alternate and field != 1:
                     sx += 1
