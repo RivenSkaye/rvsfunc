@@ -235,7 +235,6 @@ def pad_to(
     :param chroma:      Only used with single plane clips, force processing as chroma
                         to ensure values stay within the valid ranges.
     """  # noqa: W505, E501  # Silence line too long and doc line too long.
-    print(clip)
     if not clip.width or not clip.height:
         raise VariableResolutionError("pad_to")
     if clip.width >= width and clip.height >= height:
