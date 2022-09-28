@@ -36,11 +36,8 @@ extend-select =
     # Yes, I care about quotes. Deal with it.
     Q0,
     # rst docstrings formatting checker
-    RST,
-    # Typing collections. This is mostly for readability of code.
-    TYCO1
+    RST
 extend-ignore =
-    TYCO2,
     RST301,
     RST201
 # Quotes plugin: I like 'em double
@@ -61,4 +58,3 @@ rst-roles =
     meth,
     mod,
     ref
-
