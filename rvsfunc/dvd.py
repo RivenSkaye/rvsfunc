@@ -9,14 +9,17 @@ by several subcontractors. They're generally a pain in the ass and this
 module exists to alleviate some of that pain.
 """
 
+from functools import partial
 from math import floor
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 import vapoursynth as vs
+import vsutil
 
-from .errors import VariableFormatError, YUVError
+from .errors import VariableFormatError, VariableResolutionError, YUVError
 from .masking import eoe_convolution
+from .NNEDI3 import ZNEDI3
 from .utils import frame_to_array
 
 
@@ -129,3 +132,162 @@ def chromashifter(
     out = core.std.ShufflePlanes([clip, out], [0, 1, 2], vs.YUV)
 
     return out.std.Transpose() if vertical else out
+
+
+def PAR_43_480(
+    clip: vs.VideoNode,
+    fractional: bool = False,
+    scaler: Optional[Callable[[vs.VideoNode, int, int], vs.VideoNode]] = None
+) -> vs.VideoNode:
+    """
+    Conversion from DVD squeeze to glorious 4:3 by vertically resizing.
+
+    This function is NOT meant to blindly push telecined material into pre-IVTC.
+    It also doesn't handle interlaced material. The funcion assumes input to be
+    properly (or best effort) restored progressive material. It just resizes the
+    input video material to fix the Pixel Aspect Ratio. And instead of downscaling
+    any dimension, it stretches video and crops excess video. This *should* also
+    take care of removing the typical "dirty lines" on DVDs near the sides.
+
+    This function works on the assumption that the PAR adheres to the MPEG idea
+    of digitizing for 480 using a 10/11 ratio for pixel sizes. This results in
+    the typical frame dimensions you'd see in NTSC material.
+    Numbers used here are the ones from the standard and actual processing is done
+    with calculated results from the input video.
+
+    :param clip:        The deinterlaced/IVTC'd video to adjust the PAR on.
+    :param fractional:  Whether or not to allow resolutions resulting in fractional
+                        results. This will cause very slight under- or overstretching
+                        and is therefore disabled by default.
+                        Turning this on turns (D)VITC cropping OFF!
+    :param scaler:      Optional scaling function to use. Defaults to Catmull-Rom
+                        ``(Bicubic, b=0, c=0.5)`` and no custom arguments are
+                        supported, so it's recommended to use a wrapped callable.
+                        Called as ``scaler(clip, width, height)`` where:
+
+                        - clip: vs.VideoNode
+                        - width: int
+                        - height: int
+                        - returning vs.VideoNode
+    """
+    fn = "PAR_43_480"
+    if not clip.height or not clip.width:
+        raise VariableResolutionError(fn)
+    if not clip.format:
+        raise VariableFormatError(fn)
+
+    # There's sometimes 6 lines of (Digital) Vertical Intercal Timecode data.
+    # Most notably on digitized tape and film, DVDs usually don't have it in the
+    # final product. That's why DVDs aren't 486i/p but 480i/p usually.
+    if not fractional:
+        if (clip.height - 6) % 480 == 0:
+            clip = clip.std.Crop(0, 0, 6, 0)
+        elif clip.height % 486 == 0:
+            dvitc = (clip.height // 486) * 6
+            clip = clip.std.Crop(0, 0, dvitc, 0)
+
+    newheight = clip.height / (10 / 11)
+    if not newheight.is_integer() and not fractional:
+        raise ValueError(f"{fn}: Calculated target height ({newheight}) is not an "
+                         "integer resolution!")
+    vres = newheight.__ceil__() if newheight % 2 > 1.0 else newheight.__floor__()
+    if vres % 2 == 1:
+        vres += 1
+    cropmult = (clip.width / 720).__ceil__()
+    cropwidth = 8 * cropmult
+    if not scaler:
+        scaler = partial(core.resize.Bicubic, filter_param_a=0, filter_param_b=0.5)
+    return scaler(clip, clip.width, vres).std.Crop(cropwidth, cropwidth, 0, 0)
+
+
+def PAR_43_576(
+    clip: vs.VideoNode,
+    fractional: bool = False,
+    scaler: Optional[Callable[[vs.VideoNode, int, int], vs.VideoNode]] = None,
+    cscaler: Optional[Callable[[vs.VideoNode, int, int], vs.VideoNode]] = None
+) -> vs.VideoNode:
+    """
+    Conversion from DVD squeeze to glorious 4:3 by horizontally resizing.
+
+    This function is NOT meant to blindly push telecined material into pre-IVTC.
+    It also doesn't handle interlaced material. The funcion assumes input to be
+    properly (or best effort) restored progressive material. It just resizes the
+    input video material to fix the Pixel Aspect Ratio. And instead of downscaling
+    any dimension, it stretches video and crops excess video. This *should* also
+    take care of removing the typical "dirty lines" on DVDs near the sides.
+
+    This function works on the assumption that the PAR adheres to the MPEG idea
+    of digitizing for 576 using a 59/54 ratio for pixel sizes. This results in
+    the typical frame dimensions you'd see in PAL material.
+    Fractional resolutions are avoided by processing as YUV444, keep this in mind!
+    Numbers used here are the ones from the standard and actual processing is done
+    with calculated results from the input video.
+
+    :param clip:        The deinterlaced/IVTC'd video to adjust the PAR on.
+    :param fractional:  Whether or not to allow resolutions resulting in fractional
+                        results. This will cause very slight under- or overstretching
+                        and is therefore disabled by default.
+                        Turning this on prevents the addition of a 1px black bar,
+                        which would otherwise be required to prevent problematic
+                        frame dimensions, as the usual way to fix 576 width video
+                        involves stretching the width to 786 2/3 and then cropping.
+                        The alternative is to crop to 702 first and then resizing
+                        to a width of 767, which is where the padding comes in.
+    :param scaler:      Optional scaling function to use. Defaults to Catmull-Rom
+                        ``(Bicubic, b=0, c=0.5)`` and no custom arguments are
+                        supported, so it's recommended to use a wrapped callable.
+                        Called as ``scaler(clip, width, height)`` where:
+
+                        - clip: vs.VideoNode
+                        - width: int
+                        - height: int
+                        - returning vs.VideoNode
+    :param cscaler:     Only used when ``fractional`` is false. Used for scaling
+                        down the chroma back to 420. Same requirements as the
+                        ``scaler`` arg. If you wish to get 444 material back,
+                        pass ``lambda x, y, z: x``
+    """
+    fn = "PAR_43_576"
+    if not clip.height or not clip.width:
+        raise VariableResolutionError(fn)
+    if not clip.format:
+        raise VariableFormatError(fn)
+
+    if not scaler:
+        scaler = partial(core.resize.Bicubic, filter_param_a=0, filter_param_b=0.5)
+    if not cscaler:
+        cscaler = partial(core.resize.Bicubic, filter_param_a=0, filter_param_b=0)
+
+    if not fractional:
+        cropmult = clip.width // 720
+        wcrop = 9 * cropmult  # Crop to 702, 720 - 702 = 18, 18 / 2 = 9
+        chroma = [
+            ZNEDI3.rpow2(p, False, shift=False)
+            for p in vsutil.split(clip)[1:]
+        ]
+        clip = vsutil.join([vsutil.get_y(clip), *chroma])
+        cropped = clip.std.Crop(wcrop, wcrop, 0, 0)
+        newwidth = clip.width * (59 / 54)
+        if not newwidth.is_integer():
+            raise ValueError(f"{fn}: Calculated target width ({newwidth}) is not an "
+                             "integer resolution!")
+        hres = int(newwidth)
+        stretched = scaler(cropped, hres, clip.height)
+        if stretched.width % 2 == 1:
+            stretched = stretched.std.AddBorders(1, 0, 0, 0)
+        chroma = [
+            cscaler(p, stretched.width // 2, stretched.height // 2)
+            for p in vsutil.split(stretched)[1:]
+        ]
+        return vsutil.join([vsutil.get_y(stretched), *chroma])
+
+    newwidth = clip.width * (59 / 54)
+    wres = newwidth.__ceil__() if newwidth % 2 > 1.0 else newwidth.__floor__()
+    if wres % 2 == 1:
+        wres += 1
+    cropmult = (newwidth / (720 * (59 / 54))).__ceil__()
+    lcrop = rcrop = 9 * cropmult
+    if lcrop % 2 == 1:
+        lcrop -= 1
+        rcrop += 1
+    return scaler(clip, wres, clip.height).std.Crop(lcrop, rcrop, 0, 0)
