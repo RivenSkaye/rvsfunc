@@ -198,6 +198,13 @@ def fineline_mask(clip: vs.VideoNode, thresh: int = 95) -> vs.VideoNode:
     :param clip:        The clip to generate the mask for.
     :param thresh:      The threshold for the binarization step.
     """
+    if not clip.format:
+        raise VariableFormatError("fineline_mask")
+
+    depth_in = clip.format.bits_per_sample
+    clip = depth(clip, 8)
+    if depth_in > 8 and thresh > 255:
+        thresh = (thresh - 1) >> 8
 
     prew = core.std.Prewitt(clip, planes=[0])
     thin = core.std.Minimum(prew)
@@ -211,7 +218,8 @@ def fineline_mask(clip: vs.VideoNode, thresh: int = 95) -> vs.VideoNode:
 
     redo = int(floor(thresh / 2.5) * 2)
 
-    return core.std.Expr([bin_mask, maska], [f"x y < y x ? {redo} < 0 255 ?"])
+    final = core.std.Expr([bin_mask, maska], [f"x y < y x ? {redo} < 0 255 ?"])
+    return depth(final, depth_in)
 
 
 def eoe_convolution(clip: vs.VideoNode) -> vs.VideoNode:
