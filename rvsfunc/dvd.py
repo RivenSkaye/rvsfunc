@@ -9,6 +9,7 @@ by several subcontractors. They're generally a pain in the ass and this
 module exists to alleviate some of that pain.
 """
 
+from enum import Enum
 from functools import partial
 from math import floor
 from typing import Any, Callable, Dict, Optional
@@ -25,7 +26,28 @@ from .utils import frame_to_array
 
 core = vs.core
 
-__all__ = ["chromashifter"]
+__all__ = [
+    "Region", "chromashifter", "square43PAR"
+]
+
+
+class Region(Enum):
+    """
+    An enum for specifying regional coding standards.
+
+    This enum specifies the regional standards used for TV and DVD material.
+    The PAL and SECAM systems do not have any notable difference with regards to
+    (inverse) telecining, cropping, resizing and other size ratios, but they do
+    follow different standards for analog processing and it _might_ mean slightly
+    different primaries and an alternate white point as defined in BT.407/601 (BG).
+
+    Will be expanded upon to include variations of the standards like PAL-M and
+    NTSC-J at some point. Will also be moved to a utility package at some point.
+    """
+    UNKNOWN = 0
+    NTSC = 1
+    PAL = 2
+    SECAM = 3
 
 
 def chromashifter(
@@ -291,3 +313,82 @@ def PAR_43_576(
         lcrop -= 1
         rcrop += 1
     return scaler(clip, wres, clip.height).std.Crop(lcrop, rcrop, 0, 0)
+
+
+def square43PAR(
+    clip: vs.VideoNode,
+    region: Region = Region.UNKNOWN,
+    scaler: Optional[Callable[[vs.VideoNode, int, int], vs.VideoNode]] = None,
+    ntsc_down: bool = False
+) -> vs.VideoNode:
+    """
+    A function to resize non-square PAR to square PAR in the cleanest way possible.
+
+    Fixing PAR is hell and doing so is *NEVER* recommended! Unless a project has
+    constraints that require you to, in which case having a function that follows
+    the proper standards is a very nice thing to have.
+
+    This function expects IVTC'd or deinterlaced video that has no other resizing
+    or modification applied to it. As such, it does not yet handle input resolutions
+    other than 704x480, 720x480, 704x486, 720x486, 768x576, or 720x576.
+    Support for arbitrary resolutions will be added soon!
+
+    Resamples video to make sure the resulting PAR is 1:1 again, or as close as
+    possible given the circumstances. It does this through **stretching** the
+    undersampled dimension rather than squeezing the other, in an attempt
+    to prevent loss of data.
+    For NTSC with 640x480 resolutions, a boolean flag is available to downsample
+    the width instead, although this is not recommended. For reference, media players
+    don't honor these resolutions either, they stretch as well.
+    If the resulting resolution is fractional, it will be rounded to the
+    nearest legal integer value, which means there will never be more than 1px
+    difference between a perfect 1:1 PAR and the result.
+    If the input video has subsampling applied, odd values are considered the
+    same as fractional, and it will be resized to ``Res - 1`` instead.
+
+    :param clip:        Input video node that needs its PAR corrected.
+    :param region:      The coding standards region to use, one of the values
+                        available in the :class:`Region` enum.
+    :param scaler:      Optional scaling function to use. Defaults to Catmull-Rom
+                        ``(Bicubic, b=0, c=0.5)`` and no custom arguments are
+                        supported, so it's recommended to use a wrapped callable.
+                        Called as ``scaler(clip, width, height)`` where:
+
+                        - clip: vs.VideoNode
+                        - width: int
+                        - height: int
+                        - returning vs.VideoNode
+    """
+    if not clip.width or not clip.height:
+        raise VariableResolutionError("square43PAR")
+
+    if clip.width not in [704, 720] or clip.height not in [480, 486, 576]:
+        raise ValueError("Resolution is not yet supported! "
+                         f"({clip.width}x{clip.height})")
+
+    region = Region(region)
+    if region is Region.UNKNOWN:
+        region = Region.PAL if clip.height == 576 else Region.NTSC
+
+    cropfirst = region is Region.NTSC
+
+    if scaler is None:
+        scaler = partial(core.resize.Bicubic, filter_param_a=0, filter_param_b=0.5)
+
+    if cropfirst:
+        if clip.height == 486:
+            clip = clip.resize.Point(
+                clip.width, clip.height, src_top=3
+            ).std.Crop(left=0, right=0, top=0, bottom=6)
+        if clip.width == 720:
+            clip = clip.std.Crop(left=8, right=8, top=0, bottom=0)
+
+        return scaler(clip,
+                      clip.width if not ntsc_down else 640,
+                      528 if not ntsc_down else 480)
+    elif clip.width == 704:
+        clip = clip.std.AddBorders(left=8, right=8, top=0, bottom=0)
+
+    return scaler(clip, 768, clip.height).std.Crop(
+        left=32, right=32, top=24, bottom=24
+    )
