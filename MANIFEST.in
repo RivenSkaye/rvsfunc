@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+include rvsfunc/.version
+
+
+global-exclude mypy.ini .flake8 .gitignore .readthedocs.yml test.vpy
