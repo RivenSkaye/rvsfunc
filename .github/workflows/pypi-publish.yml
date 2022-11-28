@@ -44,7 +44,7 @@ jobs:
             password: ${{ secrets.PYPI_TOKEN }}
         - name: Get version number
           run: |
-            echo "RVS_VER=v$(cat .version)" >> $GITHUB_ENV
+            echo "RVS_VER=v$(cat rvsfunc/.version)" >> $GITHUB_ENV
         - name: Make GH release
           uses: marvinpinto/action-automatic-releases@v1.2.1
           with:

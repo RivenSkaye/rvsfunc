@@ -6,7 +6,7 @@ with open("README.md", "r") as rdm:
 with open("requirements.txt", "r") as rq:
     req = rq.read()
 
-with open(".version", "r") as v:
+with open("rvsfunc/.version", "r") as v:
     ver = v.read().strip()
 
 setup(
@@ -34,5 +34,6 @@ setup(
     project_urls={
         "Bug Tracker": "https://github.com/RivenSkaye/rvsfunc/issues",
         "Docs": "https://rvsfunc.tae.moe/"
-    }
+    },
+    include_package_data=True
 )

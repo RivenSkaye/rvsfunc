@@ -23,7 +23,7 @@ author = "Riven Skaye"
 html_favicon = "favicon.ico"
 
 # The full version, including alpha/beta/rc tags
-with open("../.version", "r") as v:
+with open("../rvsfunc/.version", "r") as v:
     version = v.read().strip()
 release = version
 
