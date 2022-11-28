@@ -15,6 +15,11 @@ You're also more than welcome to create an issue on GitHub,
 
 from . import NNEDI3, dvd, edgecase, errors, masking, utils
 
+__all__ = [
+    "batchindex", "dvd", "edgecase", "errors", "masking",
+    "nnedi3", "nnedi3cl", "utils", "znedi3"
+]
+
 # Alias for script compatibility
 batchindex = utils.batch_index
 
@@ -22,3 +27,13 @@ batchindex = utils.batch_index
 znedi3 = NNEDI3.ZNEDI3
 nnedi3 = NNEDI3.NNEDI3
 nnedi3cl = NNEDI3.NNEDI3CL
+
+
+def _get_ver() -> str:
+    from pathlib import Path
+    fdir = Path(__file__).absolute().parent
+    with open(f"{fdir}/.version") as v:
+        return v.read().strip()
+
+
+__version__ = _get_ver()
