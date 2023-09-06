@@ -1,6 +1,7 @@
 # IDE files #
 *.code-workspace
 .vscode/
+.ruff_cache/
 
 # Py stuff #
 __pycache__/

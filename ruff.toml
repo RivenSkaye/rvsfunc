@@ -1,0 +1,48 @@
+extend-exclude = [
+    ".git",
+    ".github",
+    ".vscode",
+    "build",
+    "dist",
+    "__pycache__",
+    "*.egg-info",
+    "setup.cfg",
+    "setup.py",
+    "docs",
+    "mypy-stubs",
+    "rvsfunc/__init__.py",
+    "test.vpy",
+]
+line-length = 85
+select = [
+    "A",
+    "ARG",
+    "C4",
+    "D",
+    "E",
+    "F",
+    "FLY",
+    "NPY",
+    "PERF",
+    "PTH",
+    "PYI",
+    "Q",
+    "RET5",
+    "RSE1",
+    "RUF",
+    "T20",
+    "TRY",
+    "W"
+]
+ignore = [
+    "D200",
+    "D202",
+    "D203",
+    "D212",
+    "D401"
+]
+
+[flake8-quotes]
+inline-quotes = "double"
+docstring-quotes = "double"
+
