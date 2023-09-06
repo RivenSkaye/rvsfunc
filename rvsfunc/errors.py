@@ -29,7 +29,7 @@ class VariableFormatError(TypeError):
 
 
 class VariableResolutionError(ValueError):
-    """Raised for functions that don't handle VarRes clips"""
+    """Raised for functions that don't handle VarRes clips."""
 
     def __init__(self, fn_name: Optional[str] = None) -> None:
         self.fn = f" in {fn_name}" if fn_name else ""
@@ -39,7 +39,7 @@ class VariableResolutionError(ValueError):
 
 
 class YUVError(ValueError):
-    """Raised for functions that only process YUV input"""
+    """Raised for functions that only process YUV input."""
 
     def __init__(self, fn_name: Optional[str] = None) -> None:
         self.fn = f" to {fn_name}" if fn_name else ""

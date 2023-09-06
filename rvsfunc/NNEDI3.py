@@ -169,6 +169,7 @@ class ZNEDI3(NNEDI3Base):
     """
     A wrapper for the znedi3 plugin.
     """
+
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
@@ -192,6 +193,7 @@ class NNEDI3(NNEDI3Base):
     """
     A wrapper for the nnedi3 plugin.
     """
+
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 
@@ -215,6 +217,7 @@ class NNEDI3CL(NNEDI3Base):
     """
     A wrapper for the NNEDI3CL plugin.
     """
+
     def __init__(self, shift: bool = True, **nnedi_kwargs: Any):
         super().__init__(shift, **nnedi_kwargs)
 

@@ -1,4 +1,5 @@
-""" Edgecase functions that were generalized for if I ever need them again.
+"""
+Edgecase functions that were generalized for if I ever need them again.
 
 These functions should probably not be used in the general use case. They're
 typically written for a very specific edgecase, but generalized for if I ever

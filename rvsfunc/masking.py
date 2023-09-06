@@ -191,7 +191,7 @@ def dehalo_mask(
 
 def fineline_mask(clip: vs.VideoNode, thresh: int = 95) -> vs.VideoNode:
     """
-    Generates a very fine mask for lineart protection. Not perfect yet
+    Generates a very fine mask for lineart protection. Not perfect yet.
 
     The generated mask is GRAY8, keep this in mind for conversions.
 
@@ -223,7 +223,7 @@ def fineline_mask(clip: vs.VideoNode, thresh: int = 95) -> vs.VideoNode:
 
 
 def eoe_convolution(clip: vs.VideoNode) -> vs.VideoNode:
-    """ Convolution written by EoE for :py:func:`.dvd.chromashifter`"""
+    """Convolution written by EoE for :py:func:`.dvd.chromashifter`."""
     matrix = [-1] * 4 + [8] + [-1] * 4
 
     return clip.std.Convolution(matrix, planes=[0, 1, 2], saturate=False)

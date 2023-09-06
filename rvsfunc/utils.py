@@ -205,7 +205,7 @@ def copy_credits(
 
 def frame_to_array(f: vs.VideoFrame) -> np.ndarray:
     """
-    Simple wrapper to turn a video frame into an numpy array
+    Simple wrapper to turn a video frame into an numpy array.
     """
     return np.dstack([
         f.get_read_array(p) for p in range(f.format.num_planes)  # type: ignore
@@ -234,7 +234,7 @@ def pad_to(
     :param range_out:   Optional output range, defaults to ``range_in`` if not given.
     :param chroma:      Only used with single plane clips, force processing as chroma
                         to ensure values stay within the valid ranges.
-    """  # noqa: W505, E501  # Silence line too long and doc line too long.
+    """  # Silence line too long and doc line too long.
     if not clip.width or not clip.height:
         raise VariableResolutionError("pad_to")
     if clip.width >= width and clip.height >= height:

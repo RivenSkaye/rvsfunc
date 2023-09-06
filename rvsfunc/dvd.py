@@ -44,6 +44,7 @@ class Region(Enum):
     Will be expanded upon to include variations of the standards like PAL-M and
     NTSC-J at some point. Will also be moved to a utility package at some point.
     """
+
     UNKNOWN = 0
     NTSC = 1
     PAL = 2
